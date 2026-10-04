@@ -833,6 +833,28 @@ body{position:fixed;inset:0}
 }
 .leaderboard-open-btn:hover{transform:translateY(-2px);border-color:rgba(63,140,95,.48);background:#f1fff5;}
 .leaderboard-open-btn:focus-visible{outline:3px solid rgba(63,140,95,.38);outline-offset:3px;}
+.menu-v29 .play-panel > #open-leaderboard-btn{
+  -webkit-appearance:none;
+  appearance:none;
+  position:relative;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:48px;
+  margin:10px 0 0;
+  padding:0 16px;
+  border:2px solid rgba(63,140,95,.24);
+  border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(239,250,241,.88));
+  box-shadow:0 7px 18px rgba(49,105,68,.09);
+  color:#397b55;
+  font-family:'Mitr','Noto Sans Thai',sans-serif;
+  font-size:14px;
+  font-weight:700;
+}
+.menu-v29 .play-panel > #open-leaderboard-btn:hover{border-color:rgba(63,140,95,.5);background:#f1fff5;}
 .leaderboard-screen.browse-only .end-board-head p,
 .leaderboard-screen.browse-only .end-impact-card,
 .leaderboard-screen.browse-only .end-stats{display:none;}
