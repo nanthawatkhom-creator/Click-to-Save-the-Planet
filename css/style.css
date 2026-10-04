@@ -756,3 +756,59 @@ body{position:fixed;inset:0}
   .result-external-action{width:min(520px,96vw);}
   .result-external-action .primary-btn{min-height:54px;font-size:16px;}
 }
+
+/* Portrait menu: allow both sections to use the full phone width. */
+@media(max-width:760px){
+  .menu-v29{
+    overflow-x:hidden;
+    overflow-y:auto;
+    align-items:flex-start;
+  }
+  .menu-v29 .menu-shell{
+    width:min(96vw,620px);
+    height:auto;
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+    gap:22px;
+    padding:24px 0 44px;
+  }
+  .menu-v29 .menu-info{
+    display:contents;
+  }
+  .menu-v29 .sdg-logos{order:1;align-self:center;}
+  .menu-v29 .menu-title{
+    order:2;
+    align-self:center;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  .menu-v29 .mission-pill{order:3;align-self:center;}
+  .menu-v29 .menu-description{
+    order:4;
+    width:100%;
+    margin-left:auto;
+    margin-right:auto;
+    padding-inline:8px;
+  }
+  .menu-v29 .waste-guide{
+    order:6;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    width:100%;
+  }
+  .menu-v29 .play-panel-wrap{
+    order:5;
+    width:100%;
+    min-width:0;
+    padding-top:28px;
+  }
+  .menu-v29 .play-panel{
+    width:100%;
+    max-width:480px;
+    margin-inline:auto;
+    padding-top:92px;
+  }
+  .menu-v29 .menu-mascot{width:132px;height:132px;top:-48px;}
+  .menu-v29 .play-panel h2{position:relative;z-index:1;}
+}

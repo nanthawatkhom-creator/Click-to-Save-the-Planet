@@ -218,6 +218,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.scale.on('resize', () => this.layout());
+    window.visualViewport?.addEventListener('resize', () => this.layout());
     this.layout();
     this.setCleanZoneVisible(false, true);
   }
@@ -266,7 +267,7 @@ class GameScene extends Phaser.Scene {
     if (!obj) return;
     const pad = obj.hitRadius || 72;
     const minY = Math.max(78, this.safeTop ? this.safeTop - 40 : 90);
-    const maxY = this.scale.height - 18;
+    const maxY = Math.min(this.scale.height, window.visualViewport?.height || this.scale.height) - 18;
     obj.x = Phaser.Math.Clamp(pointer.x + (obj.dragOffsetX || 0), pad * 0.55, this.scale.width - pad * 0.55);
     obj.y = Phaser.Math.Clamp(pointer.y + (obj.dragOffsetY || 0), minY, maxY);
     obj.angle = 0;
@@ -294,10 +295,14 @@ class GameScene extends Phaser.Scene {
 
   layout() {
     const w = this.scale.width;
-    const h = this.scale.height;
-    this.cityImage.setPosition(w / 2, h / 2);
-    this.cityImage.setScale(Math.max(w / 1600, h / 900));
-    this.smogOverlay.setPosition(w / 2, h / 2).setSize(w, h).setDisplaySize(w, h);
+    const canvasH = this.scale.height;
+    // Mobile browsers can report an innerHeight taller than the visible area
+    // while their address/tool bars are shown. Keep the bottom targets inside
+    // the actual viewport so the bins remain reachable on a portrait screen.
+    const h = Math.min(canvasH, window.visualViewport?.height || canvasH);
+    this.cityImage.setPosition(w / 2, canvasH / 2);
+    this.cityImage.setScale(Math.max(w / 1600, canvasH / 900));
+    this.smogOverlay.setPosition(w / 2, canvasH / 2).setSize(w, canvasH).setDisplaySize(w, canvasH);
 
     this.safeTop = w < 600 ? 150 : (h < 720 ? 120 : 135);
     const binOrder = ['general', 'special', 'recycle', 'organic'];
@@ -310,7 +315,8 @@ class GameScene extends Phaser.Scene {
     binOrder.forEach((cat, i) => {
       const b = this.bins[cat];
       const x = side + bw / 2 + i * (bw + gap);
-      const scale = Math.min((bw + 14) / 360, h < 700 ? 0.31 : 0.38);
+      const mobileScale = h < 700 ? 0.27 : 0.30;
+      const scale = Math.min((bw + 14) / 360, w < 600 ? mobileScale : (h < 700 ? 0.31 : 0.38));
       b.container.setPosition(x, binY);
       b.baseScale = scale;
       b.sprite.setScale(scale);
@@ -425,7 +431,7 @@ class GameScene extends Phaser.Scene {
 
   tutorialSlotPosition(slot) {
     const w = this.scale.width;
-    const h = this.scale.height;
+    const h = Math.min(this.scale.height, window.visualViewport?.height || this.scale.height);
     const portrait = w < 650 && h > w;
     if (portrait) {
       const xs = [w * 0.30, w * 0.70];
