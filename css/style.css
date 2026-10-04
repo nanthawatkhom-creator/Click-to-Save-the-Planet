@@ -812,3 +812,30 @@ body{position:fixed;inset:0}
   .menu-v29 .menu-mascot{width:132px;height:132px;top:-48px;}
   .menu-v29 .play-panel h2{position:relative;z-index:1;}
 }
+
+.leaderboard-open-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  width:100%;
+  min-height:48px;
+  margin-top:10px;
+  border:2px solid rgba(63,140,95,.22);
+  border-radius:16px;
+  background:rgba(255,255,255,.72);
+  color:#397b55;
+  font:inherit;
+  font-size:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition:background .2s ease,border-color .2s ease,transform .2s ease;
+}
+.leaderboard-open-btn:hover{transform:translateY(-2px);border-color:rgba(63,140,95,.48);background:#f1fff5;}
+.leaderboard-open-btn:focus-visible{outline:3px solid rgba(63,140,95,.38);outline-offset:3px;}
+.leaderboard-screen.browse-only .end-board-head p,
+.leaderboard-screen.browse-only .end-impact-card,
+.leaderboard-screen.browse-only .end-stats{display:none;}
+.leaderboard-screen.browse-only .end-board-head>div:first-child{flex:1;}
+.leaderboard-screen.browse-only .end-board-head h2{margin-bottom:0;}
+.leaderboard-screen.browse-only .result-kicker{color:#3f8c5f;}

@@ -121,6 +121,7 @@
             <input id="player-name" maxlength="12" autocomplete="off" inputmode="text" placeholder="พิมพ์ชื่อเล่น" />
           </div>
           <button id="start-btn" class="primary-btn menu-start-btn"><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
+          <button id="open-leaderboard-btn" class="leaderboard-open-btn" type="button"><span aria-hidden="true">🏆</span> ดู Leaderboard</button>
           <div class="round-note menu-round-note"><span class="clock-dot" aria-hidden="true"></span> ใช้เวลาเล่นประมาณ 75 วินาที</div>
           <div class="connection-row service-status"><span id="connection-dot"></span><span id="connection-text">กำลังตรวจสอบ Leaderboard</span></div>
         </div>
@@ -139,8 +140,8 @@
     <div class="end-board">
       <div class="end-board-head">
         <div>
-          <span class="result-kicker">ภารกิจสำเร็จ!</span>
-          <h2>อันดับวันนี้</h2>
+          <span class="result-kicker" id="leaderboard-kicker">ภารกิจสำเร็จ!</span>
+          <h2 id="leaderboard-title">อันดับวันนี้</h2>
           <p><strong id="end-player-name">ผู้เล่น</strong> ทำได้ <b id="end-player-score">0</b> คะแนน</p>
         </div>
         <div class="end-impact-card">

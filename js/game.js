@@ -13,6 +13,7 @@ const impactEl = $('hud-impact');
 const startScreen = $('start-screen');
 const leaderboardScreen = $('leaderboard-screen');
 const startBtn = $('start-btn');
+const openLeaderboardBtn = $('open-leaderboard-btn');
 const nextPlayerBtn = $('next-player-btn');
 const playerInput = $('player-name');
 const toastEl = $('toast');
@@ -115,6 +116,40 @@ function escapeHtml(value) {
   return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
 }
 
+function leaderboardRowsHtml(rows, current = null) {
+  return rows.map((row, index) => {
+    const isCurrent = current && row.name === current.name && Math.round(Number(row.score || 0)) === Math.round(current.score);
+    return `
+      <div class="leader-row ${isCurrent ? 'current' : ''}">
+        <div class="leader-rank">${index + 1}</div>
+        <div class="leader-name">${escapeHtml(row.name || 'ผู้เล่น')}</div>
+        <div class="leader-score">${Math.round(Number(row.score || 0)).toLocaleString('th-TH')}</div>
+        <div class="leader-impact">${Number(row.co2e || 0).toFixed(2)} kg CO₂e</div>
+      </div>`;
+  }).join('') || '<div class="leaderboard-loading">ยังไม่มีคะแนน</div>';
+}
+
+async function openLeaderboardFromMenu() {
+  stopMusic();
+  startScreen.classList.add('hidden');
+  hud.classList.add('hidden');
+  tutorialHud?.classList.add('hidden');
+  leaderboardScreen.classList.add('browse-only');
+  $('leaderboard-kicker').textContent = 'คะแนนสูงสุด';
+  $('leaderboard-title').textContent = 'Leaderboard';
+  nextPlayerBtn.textContent = 'กลับหน้าเริ่มเกม';
+  const list = $('end-leaderboard-list');
+  list.innerHTML = '<div class="leaderboard-loading">กำลังโหลดอันดับ...</div>';
+  leaderboardScreen.classList.remove('hidden');
+
+  try {
+    list.innerHTML = leaderboardRowsHtml(await loadTopScores(10));
+  } catch (err) {
+    console.warn(err);
+    list.innerHTML = '<div class="leaderboard-loading">โหลดอันดับไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>';
+  }
+}
+
 async function showEndLeaderboard(s) {
   stopMusic();
   playSound('finish');
@@ -122,6 +157,10 @@ async function showEndLeaderboard(s) {
   const accuracy = (s.correct / (total || 1)) * 100;
 
   hud.classList.add('hidden');
+  leaderboardScreen.classList.remove('browse-only');
+  $('leaderboard-kicker').textContent = 'ภารกิจสำเร็จ!';
+  $('leaderboard-title').textContent = 'อันดับวันนี้';
+  nextPlayerBtn.textContent = 'ผู้เล่นคนถัดไป';
   $('end-player-name').textContent = s.player;
   $('end-player-score').textContent = Math.round(s.score).toLocaleString('th-TH');
   $('end-impact').textContent = '≈ ' + s.impact.toFixed(2) + ' kg CO₂e';
@@ -139,17 +178,7 @@ async function showEndLeaderboard(s) {
   }
 
   try {
-    const rows = await loadTopScores(10);
-    list.innerHTML = rows.map((row, index) => {
-      const isCurrent = row.name === s.player && Math.round(Number(row.score || 0)) === Math.round(s.score);
-      return `
-        <div class="leader-row ${isCurrent ? 'current' : ''}">
-          <div class="leader-rank">${index + 1}</div>
-          <div class="leader-name">${escapeHtml(row.name || 'ผู้เล่น')}</div>
-          <div class="leader-score">${Math.round(Number(row.score || 0)).toLocaleString('th-TH')}</div>
-          <div class="leader-impact">${Number(row.co2e || 0).toFixed(2)} kg CO₂e</div>
-        </div>`;
-    }).join('') || '<div class="leaderboard-loading">ยังไม่มีคะแนน</div>';
+    list.innerHTML = leaderboardRowsHtml(await loadTopScores(10), { name: s.player, score: s.score });
   } catch (err) {
     console.warn(err);
     list.innerHTML = '<div class="leaderboard-loading">โหลดอันดับไม่สำเร็จ แต่คะแนนของคุณถูกบันทึกในเครื่องแล้ว</div>';
@@ -969,9 +998,13 @@ startBtn.addEventListener('click', () => {
   sceneRef?.startTutorial(name);
 });
 
+openLeaderboardBtn.addEventListener('click', openLeaderboardFromMenu);
+
 nextPlayerBtn.addEventListener('click', () => {
   leaderboardScreen.classList.add('hidden');
+  leaderboardScreen.classList.remove('browse-only');
   tutorialHud?.classList.add('hidden');
+  nextPlayerBtn.textContent = 'ผู้เล่นคนถัดไป';
   playerInput.value = '';
   startScreen.classList.remove('hidden');
   setTimeout(() => playerInput.focus(), 80);
