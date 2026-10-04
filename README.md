@@ -7,7 +7,6 @@
 ## เล่นออนไลน์
 
 - **[เปิดเกม](https://nanthawatkhom-creator.github.io/trash-sorter-game/)**
-- [ดู Leaderboard](https://nanthawatkhom-creator.github.io/trash-sorter-game/leaderboard.html)
 
 ## วิธีเล่น
 
