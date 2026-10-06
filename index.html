@@ -4,18 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
   <meta name="theme-color" content="#F8F2F7" />
-  <meta name="description" content="เกมคัดแยกขยะภาษาไทยสำหรับบูท ลากขยะลงถังให้ถูกประเภทภายใน 75 วินาที รองรับเมาส์และหน้าจอสัมผัส" />
+  <meta name="description" content="Click to Save the Planet เกมคัดแยกขยะภาษาไทยที่เหมาะสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 เล่น 75 วินาที รองรับหน้าจอสัมผัสและเมาส์" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="แยกให้ถูก! — Sort It Right!" />
-  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทย เล่นได้ทั้งบนคอมพิวเตอร์และหน้าจอสัมผัส" />
+  <meta property="og:title" content="Click to Save the Planet" />
+  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทยสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 พร้อม Leaderboard บนเครื่องที่เล่น" />
   <meta property="og:url" content="https://nanthawatkhom-creator.github.io/trash-sorter-game/" />
   <meta property="og:image" content="https://nanthawatkhom-creator.github.io/trash-sorter-game/media/game-cover.png" />
   <link rel="icon" href="data:," />
-  <title>แยกให้ถูก! — Sort It Right!</title>
+  <title>Click to Save the Planet</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=2026-10-05-desktop-button" />
+  <link rel="stylesheet" href="css/booth.css?v=planet-feedback-2" />
+  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-06-portrait-booth" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js'"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/howler@2.2.4/howler.min.js'"></script>
 </head>
@@ -28,19 +30,24 @@
     <div class="hud-card combo"><span>คอมโบ</span><strong id="hud-combo">x1</strong><div class="combo-track"><i id="combo-fill"></i></div></div>
     <div class="hud-center"><span class="hud-time-label">เวลา</span><strong id="hud-time">01:15</strong><span id="hud-phase">เวฟ 1</span></div>
     <div class="hud-card accuracy-live"><span>ความแม่นยำ</span><strong id="hud-accuracy">100%</strong></div>
-    <div class="hud-card impact"><span>ลดการปล่อยก๊าซเรือนกระจก</span><strong id="hud-impact">≈ 0.00 kg CO₂e</strong></div>
+    <div class="hud-card impact"><span>ช่วยลดก๊าซเรือนกระจกโดยประมาณ</span><strong id="hud-impact">≈ 0.00 kg CO₂e</strong><small>ค่าจำลองเพื่อการเรียนรู้</small></div>
     <button id="sound-btn" class="hud-sound" aria-label="เปิดปิดเสียง"><span>เสียง</span><strong>เปิด</strong></button>
   </header>
 
-  <div id="toast" class="toast"></div>
+  <div id="feedback-edge" class="feedback-edge" aria-hidden="true"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <div id="storm-banner" class="storm-banner">พายุขยะมาแล้ว</div>
-  <div id="wave-banner" class="wave-banner">เวฟ 1</div>
+  <div id="wave-banner" class="wave-banner hidden" role="status" aria-live="polite">เวฟ 1</div>
 
-  <section id="start-screen" class="screen start-screen menu-v28 menu-v29">
-    <img class="menu-bg" src="assets/menu/bg.png" alt="" aria-hidden="true" />
+  <section id="start-screen" class="screen start-screen menu-v28 menu-v29 menu-reference">
+    <div class="menu-backdrop" aria-hidden="true"><img class="menu-bg" src="assets/menu/bg.png" alt="" /></div>
+
+    <div class="menu-atmosphere" aria-hidden="true">
+      <i class="ambient-leaf"></i><i class="ambient-leaf"></i><i class="ambient-leaf"></i><i class="ambient-leaf"></i><i class="ambient-leaf"></i><i class="ambient-leaf"></i>
+      <i class="ambient-star"></i><i class="ambient-star"></i><i class="ambient-star"></i><i class="ambient-star"></i>
     <img class="menu-decor menu-decor-a" src="assets/menu/decor.png" alt="" aria-hidden="true" />
     <img class="menu-decor menu-decor-b" src="assets/menu/decor.png" alt="" aria-hidden="true" />
-
+    </div>
     <div class="menu-shell">
       <div class="menu-info">
         <div class="sdg-logos" aria-label="SDG 12 และ SDG 13">
@@ -48,24 +55,24 @@
           <img src="assets/sdg/sdg13.png" alt="SDG 13 การรับมือการเปลี่ยนแปลงสภาพภูมิอากาศ" />
         </div>
 
-        <div class="menu-title" aria-label="แยกให้ไว ทิ้งให้ถูก">
-          <span class="title-dark">แยกให้ไว</span>
-          <span class="title-pink">ทิ้งให้ถูก</span>
+        <div class="menu-title planet-title" aria-label="Click to Save the Planet">
+          <img class="planet-wordmark" src="assets/menu/planet-wordmark-v2.png" alt="" aria-hidden="true" onerror="this.hidden=true" />
+          <span class="title-dark">Click to Save</span>
+          <span class="title-pink">the Planet</span>
           <i class="title-leaf leaf-one"></i>
           <i class="title-leaf leaf-two"></i>
         </div>
 
+        <p class="menu-tagline">แยกให้ไว ทิ้งให้ถูก</p>
         <div class="mission-pill">
           <strong>เกมคัดแยกขยะ</strong>
           <b>75 วินาที</b>
           <span class="timer-mark" aria-hidden="true">◷</span>
         </div>
 
-        <p class="menu-description"><strong>ลากขยะลงถังให้ตรงประเภทมากที่สุดภายใน 75 วินาที</strong><span>ก่อนเริ่มจับเวลา คุณจะได้ลองแยกขยะทั้ง 4 ประเภทให้คุ้นมือก่อน</span></p>
-
         <div class="waste-guide" aria-label="ขยะ 4 ประเภท">
           <article class="waste-card general-card">
-            <div class="waste-art"><img src="assets/menu/general.png" alt="ถังขยะทั่วไป" /></div>
+            <div class="waste-art"><img src="assets/menu/bin-guide-general-v2.png" alt="ถังขยะทั่วไป" /></div>
             <div class="waste-name">ขยะทั่วไป</div>
             <div class="waste-items" aria-label="ตัวอย่างขยะทั่วไป">
               <img src="assets/waste_png/wrapper.png" alt="ซองขนม" />
@@ -74,7 +81,7 @@
             </div>
           </article>
           <article class="waste-card recycle-card">
-            <div class="waste-art"><img src="assets/menu/recycle.png" alt="ถังขยะรีไซเคิล" /></div>
+            <div class="waste-art"><img src="assets/menu/bin-guide-recycle-v2.png" alt="ถังขยะรีไซเคิล" /></div>
             <div class="waste-name">ขยะรีไซเคิล</div>
             <div class="waste-items" aria-label="ตัวอย่างขยะรีไซเคิล">
               <img src="assets/waste_png/pet-bottle.png" alt="ขวดพลาสติก PET" />
@@ -83,7 +90,7 @@
             </div>
           </article>
           <article class="waste-card organic-card">
-            <div class="waste-art"><img src="assets/menu/organic.png" alt="ถังขยะเปียก" /></div>
+            <div class="waste-art"><img src="assets/menu/bin-guide-organic-v2.png" alt="ถังขยะเปียก" /></div>
             <div class="waste-name">ขยะเปียก</div>
             <div class="waste-items" aria-label="ตัวอย่างขยะเปียก">
               <img src="assets/waste_png/banana-peel.png" alt="เปลือกกล้วย" />
@@ -92,20 +99,20 @@
             </div>
           </article>
           <article class="waste-card special-card">
-            <div class="waste-art"><img src="assets/menu/special.png" alt="ถังขยะอันตราย" /></div>
+            <div class="waste-art"><img src="assets/menu/bin-guide-special-v2.png" alt="ถังขยะอันตราย" /></div>
             <div class="waste-name">ขยะอันตราย</div>
             <div class="waste-items" aria-label="ตัวอย่างขยะอันตราย">
               <img src="assets/waste_png/battery.png" alt="ถ่านไฟฉาย" />
-              <img src="assets/waste_png/cable.png" alt="สายชาร์จ" />
-              <img src="assets/waste_png/phone.png" alt="โทรศัพท์เก่า" />
+              <img src="assets/waste_png_new/light-bulb.png" alt="หลอดไฟใช้แล้ว" />
+              <img src="assets/waste_png_new/spray-can.png" alt="กระป๋องสเปรย์" />
             </div>
           </article>
         </div>
       </div>
 
       <div class="play-panel-wrap">
+        <div class="menu-mascot-slot"><img class="menu-mascot" src="assets/menu/mascot-wave-v2.png" alt="มาสคอตโลกน้อยโบกมือ" /></div>
         <div class="play-panel">
-          <img class="menu-mascot" src="assets/menu/mascot.png" alt="มาสคอตเกม" />
           <span class="mascot-accent accent-a" aria-hidden="true"></span>
           <span class="mascot-accent accent-b" aria-hidden="true"></span>
           <span class="panel-leaf panel-leaf-a" aria-hidden="true"></span>
@@ -113,7 +120,6 @@
 
           <h2>พร้อมเล่นไหม?</h2>
           <div class="scribble" aria-hidden="true"><i></i><b></b></div>
-          <p class="play-hint">ใส่ชื่อเล่น แล้วเริ่มทดลองแยกขยะ 4 ชิ้น</p>
 
           <label for="player-name">ชื่อเล่น</label>
           <div class="name-field">
@@ -122,7 +128,6 @@
           </div>
           <button id="start-btn" class="primary-btn menu-start-btn"><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
           <button id="open-leaderboard-btn" class="leaderboard-open-btn" type="button"><span aria-hidden="true">🏆</span> ดู Leaderboard</button>
-          <div class="round-note menu-round-note"><span class="clock-dot" aria-hidden="true"></span> ใช้เวลาเล่นประมาณ 75 วินาที</div>
           <div class="connection-row service-status"><span id="connection-dot"></span><span id="connection-text">กำลังตรวจสอบ Leaderboard</span></div>
         </div>
       </div>
@@ -168,6 +173,6 @@
     </div>
   </section>
 </div>
-<script type="module" src="js/game.js"></script>
+<script type="module" src="js/game.js?v=planet-feedback-2"></script>
 </body>
 </html>

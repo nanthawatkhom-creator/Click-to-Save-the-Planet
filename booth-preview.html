@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Click to Save the Planet - Booth Preview</title>
+<style>
+*{box-sizing:border-box}body{margin:0;height:100dvh;overflow:hidden;background:#18362d;color:#f4fbf7;font-family:system-ui,sans-serif;display:flex;flex-direction:column}header{height:46px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:12px;font-size:12px}header a{color:#d9efb3;text-decoration:none}main{flex:1;min-height:0;display:grid;place-items:center;padding:10px}.device{position:relative;overflow:hidden;background:#dff4ef;border-radius:14px;box-shadow:0 12px 48px #0005;outline:1px solid #ffffff30}iframe{display:block;position:absolute;left:0;top:0;width:1080px;height:1920px;border:0;transform-origin:top left}
+</style>
+</head>
+<body>
+<header><span>จอบูท 1080 × 1920</span><a href="./?preview=portrait-booth-final" target="_blank" rel="noopener">เปิดเกมบนจอจริง ↗</a></header>
+<main><div class="device"><iframe src="./?preview=portrait-booth-final" title="Click to Save the Planet - จอบูทแนวตั้ง" allow="autoplay; fullscreen"></iframe></div></main>
+<script>
+const area=document.querySelector('main'),frame=document.querySelector('iframe'),device=document.querySelector('.device');
+function fit(){const s=Math.min((area.clientWidth-20)/1080,(area.clientHeight-20)/1920);device.style.width=(1080*s)+'px';device.style.height=(1920*s)+'px';frame.style.transform='scale('+s+')';}
+new ResizeObserver(fit).observe(area);fit();
+</script>
+</body>
+</html>

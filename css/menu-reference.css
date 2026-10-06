@@ -1,0 +1,481 @@
+/* Reference menu artwork and layout. Gameplay HUD styles stay in booth.css. */
+.menu-v29.menu-reference:after {
+  background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.13) 46%,rgba(250,255,235,.25))!important;
+}
+.menu-v29.menu-reference .menu-bg {
+  filter:saturate(.98) brightness(1.025);
+  object-position:50% 50%;
+}
+.menu-v29.menu-reference .menu-shell {
+  width:min(1460px,92vw);
+  display:grid;
+  grid-template-columns:minmax(0,1.35fr) minmax(380px,.8fr);
+  grid-template-areas:"info play";
+  gap:clamp(44px,4vw,80px);
+  align-items:center;
+  padding:30px 0;
+}
+.menu-v29.menu-reference .menu-info {
+  grid-area:info;
+  display:block;
+  width:100%;
+  max-width:none;
+  text-align:center;
+}
+.menu-v29.menu-reference .sdg-logos {
+  justify-content:center;
+  margin:0 auto 12px;
+  gap:14px;
+}
+.menu-v29.menu-reference .sdg-logos img {
+  width:84px;
+  height:84px;
+  object-fit:contain;
+  border-radius:18px;
+  box-shadow:0 9px 22px rgba(36,66,40,.12);
+}
+.menu-v29.menu-reference .planet-title {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  min-height:0;
+  margin:0;
+}
+.menu-v29.menu-reference .planet-wordmark {
+  display:block;
+  width:100%;
+  max-width:820px;
+  height:clamp(180px,16vw,250px);
+  object-fit:contain;
+  filter:drop-shadow(0 5px 0 rgba(255,255,255,.22));
+}
+.menu-v29.menu-reference .planet-wordmark[hidden] {display:none}
+.menu-v29.menu-reference .planet-title:has(.planet-wordmark:not([hidden])) > span,
+.menu-v29.menu-reference .planet-title:has(.planet-wordmark:not([hidden])) > .title-leaf {display:none}
+.menu-v29.menu-reference .menu-tagline {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:max-content;
+  max-width:100%;
+  min-height:44px;
+  margin:5px auto 12px;
+  padding:5px 25px;
+  border-radius:999px;
+  color:#215c37;
+  background:linear-gradient(110deg,#e8f9bd,#def3ba 54%,#edf8d0);
+  font-family:'Mitr','Noto Sans Thai',sans-serif;
+  font-size:25px;
+  font-weight:700;
+  line-height:1.25;
+  transform:rotate(-1deg);
+  box-shadow:0 5px 14px rgba(56,110,46,.06);
+}
+.menu-v29.menu-reference .mission-pill {
+  display:flex;
+  justify-content:center;
+  width:max-content;
+  max-width:100%;
+  min-height:56px;
+  margin:0 auto 20px;
+  padding:7px 24px;
+  gap:12px;
+  font-size:20px;
+  border-radius:999px;
+  background:#fff9f2;
+  box-shadow:0 9px 23px rgba(69,100,70,.08);
+}
+.menu-v29.menu-reference .mission-pill strong {font-weight:800}
+.menu-v29.menu-reference .mission-pill b {color:#f64f8e;font-size:1.1em}
+.menu-v29.menu-reference .timer-mark {color:#f64f8e;border-color:#f64f8e}
+.menu-v29.menu-reference .menu-description {display:none!important}
+.menu-v29.menu-reference .waste-guide {
+  width:100%;
+  margin:0;
+  padding:0;
+  gap:12px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  transform:none;
+}
+.menu-v29.menu-reference .waste-card {
+  min-height:0;
+  padding:8px 8px 12px;
+  overflow:hidden;
+  border:4px solid rgba(255,255,255,.94);
+  border-radius:27px;
+  box-shadow:0 11px 24px rgba(54,91,57,.08);
+}
+.menu-v29.menu-reference .general-card {background:linear-gradient(150deg,#f1ece5,#fffdf6)}
+.menu-v29.menu-reference .recycle-card {background:linear-gradient(150deg,#d5edff,#eef9ff)}
+.menu-v29.menu-reference .organic-card {background:linear-gradient(150deg,#e3f5d1,#f8ffed)}
+.menu-v29.menu-reference .special-card {background:linear-gradient(150deg,#ffe0e4,#fff6f2)}
+.menu-v29.menu-reference .waste-art {
+  height:128px;
+  overflow:visible;
+  border-radius:0;
+}
+.menu-v29.menu-reference .waste-art img {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  transform:none;
+  filter:drop-shadow(0 7px 6px rgba(30,62,35,.12));
+}
+.menu-v29.menu-reference .waste-card:hover .waste-art img {transform:translateY(-3px) rotate(-1deg)}
+.menu-v29.menu-reference .waste-name {
+  width:100%;
+  min-width:0;
+  min-height:34px;
+  margin:0;
+  padding:5px 3px;
+  font-size:13px;
+  line-height:1.2;
+  box-shadow:none;
+}
+.menu-v29.menu-reference .waste-items {
+  min-height:0;
+  margin:8px 0 0;
+  gap:2px;
+}
+.menu-v29.menu-reference .waste-items img {width:42px;height:44px}
+.menu-v29.menu-reference .play-panel-wrap {
+  grid-area:play;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  gap:0;
+  padding:0;
+  margin:0;
+}
+.menu-v29.menu-reference .menu-mascot-slot {
+  position:relative;
+  z-index:5;
+  left:auto;
+  top:auto;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  width:260px;
+  height:215px;
+  margin:0 0 -24px;
+  transform:none;
+}
+.menu-v29.menu-reference .menu-mascot-slot .menu-mascot {
+  position:relative;
+  left:auto;
+  top:16px;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:50% 100%;
+  transform-origin:50% 95%;
+  filter:drop-shadow(0 9px 12px rgba(31,79,42,.13));
+  animation:referenceMascotFloat 5.4s ease-in-out infinite;
+}
+.menu-v29.menu-reference .menu-mascot-slot:before {inset:22% -5% 0;opacity:.7}
+.menu-v29.menu-reference .menu-mascot-slot:after {
+  right:-3%;
+  top:23%;
+  font-size:26px;
+  text-shadow:-248px 55px 0 #fff3a9,-20px 120px 0 #ebffc9;
+}
+.menu-v29.menu-reference .play-panel {
+  position:relative;
+  z-index:4;
+  width:100%;
+  max-width:500px;
+  min-height:0;
+  padding:30px 34px 28px;
+  border:4px solid rgba(255,255,255,.98);
+  border-radius:42px;
+  background:linear-gradient(135deg,rgba(255,255,255,.99),rgba(252,255,244,.95));
+  box-shadow:0 24px 45px rgba(41,83,48,.13),inset 0 2px 0 white;
+}
+.menu-v29.menu-reference .play-panel:before {
+  background:radial-gradient(circle at -7% 29%,rgba(244,196,211,.20),transparent 25%),radial-gradient(circle at 101% 95%,rgba(188,232,107,.17),transparent 34%);
+}
+.menu-v29.menu-reference .play-panel h2 {
+  font-size:38px;
+  line-height:1.12;
+  color:#1e544d;
+  font-weight:700;
+  letter-spacing:-.035em;
+}
+.menu-v29.menu-reference .scribble {
+  width:180px;
+  height:12px;
+  margin:4px auto 15px;
+}
+.menu-v29.menu-reference .scribble i {height:5px;background:#f976a3;transform:rotate(-4deg)}
+.menu-v29.menu-reference .scribble b {display:none}
+.menu-v29.menu-reference .play-hint,
+.menu-v29.menu-reference .menu-round-note {display:none!important}
+.menu-v29.menu-reference .play-panel label {margin-bottom:8px;font-size:18px;line-height:1.25}
+.menu-v29.menu-reference .name-field input {
+  height:68px;
+  padding-left:58px;
+  border-color:#d7dce1;
+  border-radius:22px;
+  color:#34424b;
+  font-size:20px;
+  background:rgba(255,255,255,.96);
+}
+.menu-v29.menu-reference .name-field input::placeholder {color:#8a93a2}
+.menu-v29.menu-reference .name-field input:focus {
+  border-color:#8fcf8c;
+  box-shadow:0 0 0 5px rgba(133,198,116,.15);
+}
+.menu-v29.menu-reference .name-icon {left:22px;background:#8f99a9}
+.menu-v29.menu-reference .name-icon:after {background:#8f99a9}
+.menu-v29.menu-reference .menu-start-btn {
+  height:73px;
+  min-height:0;
+  margin-top:14px;
+  border-radius:24px!important;
+  background:linear-gradient(105deg,#ff4d9a,#ff7e7c 53%,#ffc559)!important;
+  font-size:30px!important;
+  box-shadow:0 12px 24px rgba(244,99,141,.2)!important;
+}
+.menu-v29.menu-reference .menu-start-btn i {margin-left:20px}
+.menu-v29.menu-reference .play-panel > #open-leaderboard-btn {
+  height:64px;
+  min-height:0;
+  margin-top:12px;
+  gap:13px;
+  border:2px solid #c7e1cf;
+  border-radius:23px;
+  color:#236c52;
+  background:linear-gradient(180deg,#fcfffc,#edf8ec);
+  font-size:21px;
+  box-shadow:0 6px 14px rgba(63,100,60,.06);
+}
+.menu-v29.menu-reference .play-panel > #open-leaderboard-btn > span {font-size:1.25em}
+.menu-v29.menu-reference .panel-leaf {opacity:.65}
+.menu-v29.menu-reference .panel-leaf-a {top:25%;right:8px}
+.menu-v29.menu-reference .panel-leaf-b {bottom:20px;left:-12px}
+.menu-v29.menu-reference .mascot-accent {top:32px;right:28px;opacity:.8}
+.menu-v29.menu-reference .mascot-accent.accent-b {top:62px;right:14px}
+.menu-v29.menu-reference.starting .menu-mascot-slot .menu-mascot {animation:planetCheer .24s ease-out both}
+@keyframes referenceMascotFloat {
+  0%,100% {transform:translateY(0) rotate(-1deg)}
+  50% {transform:translateY(-7px) rotate(1.5deg)}
+}
+
+/* One screen composition on the 1080 × 1920 booth. */
+.booth-portrait .menu-v29.menu-reference .menu-shell {
+  width:min(94vw,calc(1000 * var(--booth-unit)));
+  height:auto;
+  min-height:100%;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-areas:"sdgs" "title" "tagline" "mission" "play" "guide";
+  align-content:center;
+  justify-items:center;
+  gap:calc(16 * var(--booth-unit));
+  padding:calc(42 * var(--booth-unit)) 0 calc(40 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .menu-info {display:contents}
+.booth-portrait .menu-v29.menu-reference .sdg-logos {
+  grid-area:sdgs;
+  gap:calc(14 * var(--booth-unit));
+  margin:0;
+}
+.booth-portrait .menu-v29.menu-reference .sdg-logos img {
+  width:calc(116 * var(--booth-unit));
+  height:calc(116 * var(--booth-unit));
+  border-radius:calc(22 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .planet-title {grid-area:title;margin:0}
+.booth-portrait .menu-v29.menu-reference .planet-wordmark {
+  width:min(100%,calc(880 * var(--booth-unit)));
+  max-width:none;
+  height:calc(300 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .menu-tagline {
+  grid-area:tagline;
+  min-height:calc(62 * var(--booth-unit));
+  margin:0;
+  padding:calc(6 * var(--booth-unit)) calc(30 * var(--booth-unit));
+  font-size:calc(38 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .mission-pill {
+  grid-area:mission;
+  min-height:calc(76 * var(--booth-unit));
+  margin:0;
+  padding:calc(8 * var(--booth-unit)) calc(32 * var(--booth-unit));
+  gap:calc(14 * var(--booth-unit));
+  font-size:calc(31 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .timer-mark {
+  width:calc(44 * var(--booth-unit));
+  height:calc(44 * var(--booth-unit));
+  border-width:calc(3 * var(--booth-unit));
+  font-size:calc(28 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .play-panel-wrap {
+  grid-area:play;
+  width:min(100%,calc(860 * var(--booth-unit)));
+  gap:0;
+  margin:0;
+  padding:0;
+}
+.booth-portrait .menu-v29.menu-reference .menu-mascot-slot {
+  width:calc(380 * var(--booth-unit));
+  height:calc(330 * var(--booth-unit));
+  margin-bottom:calc(-30 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .menu-mascot-slot .menu-mascot {height:100%;width:100%;top:calc(20 * var(--booth-unit))}
+.booth-portrait .menu-v29.menu-reference .menu-mascot-slot:after {
+  font-size:calc(34 * var(--booth-unit));
+  text-shadow:calc(-350 * var(--booth-unit)) calc(75 * var(--booth-unit)) 0 #fff2ad,calc(-10 * var(--booth-unit)) calc(172 * var(--booth-unit)) 0 #efffcf;
+}
+.booth-portrait .menu-v29.menu-reference .play-panel {
+  width:100%;
+  max-width:none;
+  padding:calc(26 * var(--booth-unit)) calc(50 * var(--booth-unit));
+  border-width:calc(5 * var(--booth-unit));
+  border-radius:calc(56 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .play-panel h2 {
+  font-size:calc(64 * var(--booth-unit));
+  line-height:1.12;
+}
+.booth-portrait .menu-v29.menu-reference .scribble {
+  width:calc(260 * var(--booth-unit));
+  height:calc(12 * var(--booth-unit));
+  margin:calc(4 * var(--booth-unit)) auto calc(14 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .scribble i {height:calc(6 * var(--booth-unit))}
+.booth-portrait .menu-v29.menu-reference .play-panel label {
+  margin-bottom:calc(8 * var(--booth-unit));
+  font-size:calc(28 * var(--booth-unit));
+  line-height:1.25;
+}
+.booth-portrait .menu-v29.menu-reference .name-field input {
+  height:calc(92 * var(--booth-unit));
+  padding-left:calc(86 * var(--booth-unit));
+  border-width:calc(2 * var(--booth-unit));
+  border-radius:calc(26 * var(--booth-unit));
+  font-size:calc(32 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .name-icon {
+  left:calc(34 * var(--booth-unit));
+  width:calc(23 * var(--booth-unit));
+  height:calc(23 * var(--booth-unit));
+  margin-top:calc(-5 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .name-icon:after {
+  width:calc(36 * var(--booth-unit));
+  height:calc(17 * var(--booth-unit));
+  left:calc(-6 * var(--booth-unit));
+  top:calc(24 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .menu-start-btn {
+  height:calc(98 * var(--booth-unit));
+  margin-top:calc(14 * var(--booth-unit));
+  border-radius:calc(28 * var(--booth-unit))!important;
+  font-size:calc(47 * var(--booth-unit))!important;
+}
+.booth-portrait .menu-v29.menu-reference .menu-start-btn i {
+  margin-left:calc(24 * var(--booth-unit));
+  border-top-width:calc(18 * var(--booth-unit));
+  border-bottom-width:calc(18 * var(--booth-unit));
+  border-left-width:calc(28 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {
+  height:calc(86 * var(--booth-unit));
+  margin-top:calc(12 * var(--booth-unit));
+  gap:calc(20 * var(--booth-unit));
+  border-width:calc(2 * var(--booth-unit));
+  border-radius:calc(27 * var(--booth-unit));
+  font-size:calc(32 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .mascot-accent {
+  top:calc(30 * var(--booth-unit));
+  right:calc(43 * var(--booth-unit));
+  width:calc(12 * var(--booth-unit));
+  height:calc(45 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .mascot-accent.accent-b {
+  top:calc(72 * var(--booth-unit));
+  right:calc(29 * var(--booth-unit));
+  height:calc(30 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .panel-leaf-a {right:calc(13 * var(--booth-unit));top:26%}
+.booth-portrait .menu-v29.menu-reference .panel-leaf-b {left:calc(-13 * var(--booth-unit));bottom:calc(20 * var(--booth-unit))}
+.booth-portrait .menu-v29.menu-reference .waste-guide {
+  grid-area:guide;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:calc(14 * var(--booth-unit));
+  margin:0;
+}
+.booth-portrait .menu-v29.menu-reference .waste-card {
+  height:calc(294 * var(--booth-unit));
+  padding:calc(10 * var(--booth-unit));
+  border-width:calc(5 * var(--booth-unit));
+  border-radius:calc(40 * var(--booth-unit));
+}
+.booth-portrait .menu-v29.menu-reference .waste-art {height:calc(160 * var(--booth-unit))}
+.booth-portrait .menu-v29.menu-reference .waste-art img {width:100%;height:100%}
+.booth-portrait .menu-v29.menu-reference .waste-name {
+  min-height:calc(45 * var(--booth-unit));
+  margin:0;
+  padding:calc(5 * var(--booth-unit)) 0;
+  font-size:calc(23 * var(--booth-unit));
+  line-height:1.2;
+}
+.booth-portrait .menu-v29.menu-reference .waste-items {gap:0;margin:calc(6 * var(--booth-unit)) 0 0}
+.booth-portrait .menu-v29.menu-reference .waste-items img {width:calc(63 * var(--booth-unit));height:calc(49 * var(--booth-unit))}
+.booth-portrait.keyboard-open .menu-v29.menu-reference .menu-shell {align-content:start;min-height:0}
+
+/* Phone screens keep tap targets usable and may scroll below the four categories. */
+@media(max-width:480px) {
+  .booth-portrait .menu-v29.menu-reference .menu-shell {width:94vw;gap:12px;padding:24px 0 30px;align-content:start}
+  .booth-portrait .menu-v29.menu-reference .sdg-logos img {width:43px;height:43px;border-radius:10px}
+  .booth-portrait .menu-v29.menu-reference .menu-tagline {min-height:29px;padding:4px 18px;font-size:18px}
+  .booth-portrait .menu-v29.menu-reference .mission-pill {min-height:36px;padding:5px 13px;font-size:13px;gap:7px}
+  .booth-portrait .menu-v29.menu-reference .timer-mark {width:24px;height:24px;border-width:2px;font-size:15px}
+  .booth-portrait .menu-v29.menu-reference .play-panel-wrap {width:100%}
+  .booth-portrait .menu-v29.menu-reference .menu-mascot-slot {width:145px;height:120px;margin-bottom:-13px}
+  .booth-portrait .menu-v29.menu-reference .play-panel {padding:19px 18px 20px;border:3px solid white;border-radius:29px}
+  .booth-portrait .menu-v29.menu-reference .play-panel h2 {font-size:28px}
+  .booth-portrait .menu-v29.menu-reference .scribble {width:125px;height:10px;margin:3px auto 12px}
+  .booth-portrait .menu-v29.menu-reference .scribble i {height:3px}
+  .booth-portrait .menu-v29.menu-reference .play-panel label {font-size:14px;margin-bottom:6px}
+  .booth-portrait .menu-v29.menu-reference .name-field input {height:49px;border-width:1.5px;border-radius:14px;padding-left:43px;font-size:16px}
+  .booth-portrait .menu-v29.menu-reference .name-icon {left:18px;width:14px;height:14px;margin-top:-3px}
+  .booth-portrait .menu-v29.menu-reference .name-icon:after {width:21px;height:10px;left:-3px;top:14px}
+  .booth-portrait .menu-v29.menu-reference .menu-start-btn {height:52px;margin-top:10px;border-radius:16px!important;font-size:25px!important}
+  .booth-portrait .menu-v29.menu-reference .menu-start-btn i {border-top-width:10px;border-bottom-width:10px;border-left-width:15px;margin-left:14px}
+  .booth-portrait .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {height:46px;margin-top:9px;border-width:1.5px;border-radius:15px;font-size:17px;gap:9px}
+  .booth-portrait .menu-v29.menu-reference .waste-guide {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .booth-portrait .menu-v29.menu-reference .waste-card {height:auto;padding:8px;border-width:3px;border-radius:25px}
+  .booth-portrait .menu-v29.menu-reference .waste-art {height:108px}
+  .booth-portrait .menu-v29.menu-reference .waste-name {min-height:29px;font-size:14px;padding:4px 0}
+  .booth-portrait .menu-v29.menu-reference .waste-items {margin-top:6px;gap:2px}
+  .booth-portrait .menu-v29.menu-reference .waste-items img {width:37px;height:37px}
+}
+@media(max-height:760px) and (min-width:1081px) {
+  html:not(.booth-portrait) .menu-v29.menu-reference .menu-shell {padding:18px 0;gap:32px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .sdg-logos img {width:63px;height:63px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .planet-wordmark {height:170px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .menu-tagline {font-size:21px;min-height:38px;margin-bottom:9px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .mission-pill {min-height:45px;margin-bottom:13px;font-size:17px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .waste-art {height:103px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .waste-items img {width:34px;height:34px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .menu-mascot-slot {height:160px;width:200px;margin-bottom:-18px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .play-panel {padding:24px;border-radius:34px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .play-panel h2 {font-size:31px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .name-field input {height:55px;font-size:17px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .menu-start-btn {height:61px;font-size:26px!important}
+  html:not(.booth-portrait) .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {height:52px;font-size:18px}
+}
+@media(prefers-reduced-motion:reduce) {
+  .menu-v29.menu-reference .menu-mascot-slot .menu-mascot,
+  .menu-v29.menu-reference.starting .menu-mascot-slot .menu-mascot {animation:none!important}
+}

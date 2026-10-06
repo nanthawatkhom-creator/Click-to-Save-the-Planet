@@ -1,5 +1,6 @@
-import { WASTE_ITEMS, CATEGORIES } from '../data/items.js';
+import { WASTE_ITEMS } from '../data/items.js';
 import { getConnectionMode, submitScore, loadTopScores } from './leaderboard-service.js';
+import { setupBoothViewport, portraitMetrics } from './booth-ui.js';
 
 const $ = (id) => document.getElementById(id);
 const hud = $('hud');
@@ -26,6 +27,16 @@ const comboCard = document.querySelector('.hud-card.combo');
 const tutorialHud = $('tutorial-hud');
 const tutorialProgressFill = $('tutorial-progress-fill');
 const tutorialProgressText = $('tutorial-progress-text');
+const feedbackEdge = $('feedback-edge');
+let bannerTimer;
+let noticeBusy = false;
+let noticeQueue = [];
+let edgeTimer;
+let impactTimer;
+let comboTimer;
+let lastEdgeAt = 0;
+
+setupBoothViewport();
 
 const BY_ID = Object.fromEntries(WASTE_ITEMS.map(item => [item.id, item]));
 
@@ -78,6 +89,7 @@ soundBtn.addEventListener('click', () => {
 });
 
 function toast(msg, tone = 'good') {
+  if (noticeBusy) return;
   toastEl.textContent = msg;
   toastEl.dataset.tone = tone;
   toastEl.classList.remove('show');
@@ -93,23 +105,78 @@ function updateHud(s) {
   timeEl.textContent = `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
   const total = s.correct + s.wrong + s.missed;
   accEl.textContent = ((s.correct / (total || 1)) * 100).toFixed(0) + '%';
+  const previousImpact = Number(impactEl.dataset.value || 0);
   impactEl.textContent = '≈ ' + s.impact.toFixed(2) + ' kg CO₂e';
+  impactEl.dataset.value = s.impact;
+  if (s.impact > previousImpact) {
+    clearTimeout(impactTimer);
+    impactEl.classList.remove('is-updated');
+    void impactEl.offsetWidth;
+    impactEl.classList.add('is-updated');
+    impactTimer = setTimeout(() => impactEl.classList.remove('is-updated'), 420);
+  }
   phaseEl.textContent = `เวฟ ${Math.max(1, s.waveIndex)}${s.storm ? ' · พายุขยะ' : ''}`;
   comboCard?.classList.toggle('hot', s.combo >= 4);
 }
 
 function showStorm() {
-  stormBanner.classList.remove('show');
-  void stormBanner.offsetWidth;
-  stormBanner.classList.add('show');
+  showWaveBanner('พายุขยะมาแล้ว! เหลือ 15 วินาที', { tone: 'warning', priority: true });
   playSound('storm');
 }
 
-function showWaveBanner(text) {
+function showWaveBanner(text, { mode = 'notice', tone = 'normal', priority = false } = {}) {
+  if (mode === 'countdown' || priority) {
+    clearTimeout(bannerTimer);
+    noticeBusy = false;
+    noticeQueue = [];
+  } else if (noticeBusy) {
+    if (!noticeQueue.some(notice => notice.text === text)) {
+      noticeQueue.push({ text, tone });
+      noticeQueue = noticeQueue.slice(-3);
+    }
+    return;
+  }
+  toastEl.classList.remove('show');
   waveBanner.textContent = text;
+  waveBanner.dataset.mode = mode;
+  waveBanner.dataset.tone = tone;
+  waveBanner.classList.remove('hidden');
   waveBanner.classList.remove('show');
   void waveBanner.offsetWidth;
   waveBanner.classList.add('show');
+  noticeBusy = mode === 'notice';
+  bannerTimer = setTimeout(() => {
+    waveBanner.classList.remove('show');
+    waveBanner.classList.add('hidden');
+    noticeBusy = false;
+    const next = noticeQueue.shift();
+    if (next) showWaveBanner(next.text, { tone: next.tone });
+  }, mode === 'countdown' ? 850 : 2000);
+}
+
+function wrongEdge() {
+  const now = Date.now();
+  if (now - lastEdgeAt < 350) return;
+  lastEdgeAt = now;
+  clearTimeout(edgeTimer);
+  feedbackEdge.dataset.tone = 'wrong';
+  feedbackEdge.classList.remove('show');
+  void feedbackEdge.offsetWidth;
+  feedbackEdge.classList.add('show');
+  edgeTimer = setTimeout(() => feedbackEdge.classList.remove('show'), 350);
+}
+
+function resetVisualFeedback() {
+  for (const timer of [bannerTimer, edgeTimer, impactTimer, comboTimer]) clearTimeout(timer);
+  noticeBusy = false;
+  noticeQueue = [];
+  waveBanner.classList.remove('show');
+  waveBanner.classList.add('hidden');
+  stormBanner.classList.remove('show');
+  toastEl.classList.remove('show');
+  feedbackEdge.classList.remove('show');
+  impactEl.classList.remove('is-updated');
+  comboCard?.classList.remove('is-celebrating');
 }
 
 function escapeHtml(value) {
@@ -248,6 +315,10 @@ class GameScene extends Phaser.Scene {
 
     this.scale.on('resize', () => this.layout());
     window.visualViewport?.addEventListener('resize', () => this.layout());
+    this.hudResizeObserver = new ResizeObserver(() => this.layout());
+    this.hudResizeObserver.observe(hud);
+    this.hudResizeObserver.observe(tutorialHud);
+    this.events.once('shutdown', () => this.hudResizeObserver.disconnect());
     this.layout();
     this.setCleanZoneVisible(false, true);
   }
@@ -325,46 +396,69 @@ class GameScene extends Phaser.Scene {
   layout() {
     const w = this.scale.width;
     const canvasH = this.scale.height;
-    // Mobile browsers can report an innerHeight taller than the visible area
-    // while their address/tool bars are shown. Keep the bottom targets inside
-    // the actual viewport so the bins remain reachable on a portrait screen.
     const h = Math.min(canvasH, window.visualViewport?.height || canvasH);
+    const { portrait, unit: u } = portraitMetrics(w, h);
+    const previousFallFactor = this.portraitLayout ? this.playHeight / 900 : 1;
+    const fallFactor = portrait ? h / 900 : 1;
+    this.portraitLayout = portrait;
+    this.layoutUnit = u;
+    this.playHeight = h;
     this.cityImage.setPosition(w / 2, canvasH / 2);
     this.cityImage.setScale(Math.max(w / 1600, canvasH / 900));
     this.smogOverlay.setPosition(w / 2, canvasH / 2).setSize(w, canvasH).setDisplaySize(w, canvasH);
 
-    this.safeTop = w < 600 ? 150 : (h < 720 ? 120 : 135);
+    const panel = this.tutorialMode ? tutorialHud : hud;
+    const panelBottom = panel.getBoundingClientRect().bottom;
+    const baseTop = portrait ? Math.max(110, 220 * u) : (w < 600 ? 150 : (h < 720 ? 120 : 135));
+    const messageSpace = portrait ? Math.max(56, 136 * u) : 80;
+    const panelGap = portrait ? Math.max(12, 24 * u) : 12;
+    this.safeTop = panelBottom > 0
+      ? Math.max(baseTop, panelBottom + panelGap * 2 + messageSpace)
+      : baseTop;
+    document.documentElement.style.setProperty('--hud-bottom', (panelBottom || baseTop) + 'px');
     const binOrder = ['general', 'special', 'recycle', 'organic'];
-    const side = Math.max(5, w * 0.012);
-    const gap = Math.max(2, w * 0.004);
-    const total = w - side * 2;
-    const bw = (total - gap * 3) / 4;
-    const binY = h - 4;
+    const side = portrait ? Math.max(8, 60 * u) : Math.max(5, w * .012);
+    const gap = portrait ? Math.max(5, 18 * u) : Math.max(2, w * .004);
+    const bw = (w - side * 2 - gap * 3) / 4;
+    const binY = h - (portrait ? Math.max(44, 100 * u) : 4);
+    this.binTop = h;
 
     binOrder.forEach((cat, i) => {
       const b = this.bins[cat];
       const x = side + bw / 2 + i * (bw + gap);
-      const mobileScale = h < 700 ? 0.27 : 0.30;
-      const scale = Math.min((bw + 14) / 360, w < 600 ? mobileScale : (h < 700 ? 0.31 : 0.38));
+      const mobileScale = h < 700 ? .27 : .30;
+      const scale = portrait
+        ? Math.min(bw * .92 / b.sprite.width, 390 * u / b.sprite.height)
+        : Math.min((bw + 14) / 360, w < 600 ? mobileScale : (h < 700 ? .31 : .38));
       b.container.setPosition(x, binY);
+      b.baseX = x;
       b.baseScale = scale;
       b.sprite.setScale(scale);
       b.glow.setScale(scale * 1.10);
-      const hitW = Math.max(98, bw * 1.08);
-      const hitH = Math.max(180, Math.min(250, h * 0.29));
-      b.hit = new Phaser.Geom.Ellipse(x, binY - hitH * 0.48, hitW, hitH);
+      b.shadow.setDisplaySize(portrait ? bw * .76 : 120, portrait ? Math.max(10, 24 * u) : 24);
+      b.label.setVisible(portrait).setPosition(0, Math.max(16, 32 * u));
+      b.label.setFontSize(Math.max(12, 26 * u)).setPadding(Math.max(4, 14 * u), Math.max(3, 6 * u));
+      const artH = b.sprite.displayHeight;
+      this.binTop = Math.min(this.binTop, binY - artH);
+      const hitW = portrait ? bw * .96 : Math.max(98, bw * 1.08);
+      const hitH = portrait ? artH * .98 : Math.max(180, Math.min(250, h * .29));
+      b.hit = new Phaser.Geom.Ellipse(x, binY - hitH * .50, hitW, hitH);
     });
 
-    const cleanR = w < 760 ? 52 : 62;
-    this.cleanCenter = { x: w - cleanR - 22, y: Math.max(150, h * 0.22), r: cleanR };
+    const cleanR = portrait ? Math.max(44, 86 * u) : (w < 760 ? 52 : 62);
+    this.cleanCenter = { x: w - cleanR - Math.max(18, 48 * u), y: Math.max(this.safeTop + cleanR + (portrait ? 24 * u : 12), h * .22), r: cleanR };
     this.cleanG.clear();
-    this.cleanG.fillStyle(0xFFFFFF, 0.90);
-    this.cleanG.lineStyle(4, 0x8DE4DB, 0.92);
+    this.cleanG.fillStyle(0xFFFFFF, .90);
+    this.cleanG.lineStyle(4, 0x8DE4DB, .92);
     this.cleanG.fillCircle(this.cleanCenter.x, this.cleanCenter.y, cleanR);
     this.cleanG.strokeCircle(this.cleanCenter.x, this.cleanCenter.y, cleanR);
-    this.cleanPulse.setPosition(this.cleanCenter.x, this.cleanCenter.y).setRadius(cleanR * 0.94);
-    this.cleanText.setPosition(this.cleanCenter.x, this.cleanCenter.y - 8);
-    this.cleanSub.setPosition(this.cleanCenter.x, this.cleanCenter.y + 18);
+    this.cleanPulse.setPosition(this.cleanCenter.x, this.cleanCenter.y).setRadius(cleanR * .94);
+    this.cleanText.setFontSize(portrait ? Math.max(12, 26 * u) : 16).setPosition(this.cleanCenter.x, this.cleanCenter.y - (portrait ? 12 * u : 8));
+    this.cleanSub.setFontSize(portrait ? Math.max(9, 18 * u) : 10).setPosition(this.cleanCenter.x, this.cleanCenter.y + (portrait ? 25 * u : 18));
+    for (const item of this.items) {
+      if (Number.isFinite(item.fallSpeed)) item.fallSpeed *= fallFactor / previousFallFactor;
+      this.resizeWasteItem(item);
+    }
     if (this.tutorialMode && this.items.length) this.positionTutorialItems();
   }
 
@@ -376,8 +470,7 @@ class GameScene extends Phaser.Scene {
       this.cleanG?.setAlpha(0);
       this.tweens.add({ targets: this.cleanG, alpha: 1, duration: 260 });
       this.tweens.add({ targets: [this.cleanText, this.cleanSub, this.cleanPulse], scale: 1, alpha: 1, duration: 360, ease: 'Back.Out' });
-      showWaveBanner('ปลดล็อก · จุดล้าง');
-      toast('ของเปื้อนต้องผ่านจุดล้างก่อนทิ้ง', 'clean');
+      showWaveBanner('ปลดล็อกจุดล้าง · ล้างของเปื้อนก่อนทิ้ง');
     }
   }
 
@@ -387,12 +480,15 @@ class GameScene extends Phaser.Scene {
       const shadow = this.add.ellipse(0, -2, 120, 24, 0x000000, 0.18);
       const glow = this.add.image(0, 0, 'bin_closed_glow_' + cat).setOrigin(0.5, 1).setAlpha(0);
       const sprite = this.add.image(0, 0, 'bin_closed_' + cat).setOrigin(0.5, 1);
-      c.add([shadow, glow, sprite]);
+      const names = { general: 'ทั่วไป', special: 'อันตราย', recycle: 'รีไซเคิล', organic: 'ขยะเปียก' };
+      const label = this.add.text(0, 0, names[cat], { fontFamily: 'Noto Sans Thai, sans-serif', fontSize: '26px', fontStyle: 'bold', color: '#294e43', backgroundColor: '#fffdf4' }).setOrigin(.5).setVisible(false);
+      c.add([shadow, glow, sprite, label]);
       this.bins[cat] = {
         container: c,
         shadow,
         glow,
         sprite,
+        label,
         hit: null,
         state: 'closed',
         baseScale: 1,
@@ -409,27 +505,35 @@ class GameScene extends Phaser.Scene {
     if (!b || b.state === state) return;
     b.state = state;
     this.tweens.killTweensOf([b.sprite, b.glow, b.container]);
+    b.container.x = b.baseX;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced && (state === 'success' || state === 'wrong')) {
+      b.sprite.setTexture(b.openKey).setScale(b.baseScale);
+      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.10).setAlpha(.85).setTint(state === 'success' ? 0x8CE1A6 : 0xFF566A);
+      this.time.delayedCall(250, () => this.setBinVisual(cat, 'closed'));
+      return;
+    }
 
     if (state === 'closed') {
       b.sprite.setTexture(b.closedKey);
-      b.glow.setTexture(b.closedGlowKey).setAlpha(0);
+      b.glow.setTexture(b.closedGlowKey).setAlpha(0).clearTint();
       this.tweens.add({ targets: b.sprite, scale: b.baseScale, duration: 90, ease: 'Sine.Out' });
       this.tweens.add({ targets: b.glow, scale: b.baseScale * 1.10, alpha: 0, duration: 90 });
     } else if (state === 'open') {
       b.sprite.setTexture(b.openKey);
-      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.12).setAlpha(0.82);
+      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.12).setAlpha(0.82).clearTint();
       this.tweens.add({ targets: b.sprite, scale: b.baseScale * 1.025, duration: 90, ease: 'Sine.Out' });
-      this.tweens.add({ targets: b.glow, alpha: { from: 0.48, to: 0.90 }, scale: { from: b.baseScale * 1.08, to: b.baseScale * 1.14 }, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
+      if (!reduced) this.tweens.add({ targets: b.glow, alpha: { from: 0.48, to: 0.90 }, scale: { from: b.baseScale * 1.08, to: b.baseScale * 1.14 }, duration: 420, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
     } else if (state === 'success') {
       b.sprite.setTexture(b.openKey);
-      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.16).setAlpha(1);
+      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.16).setAlpha(1).setTint(0x8CE1A6);
       this.tweens.add({ targets: [b.sprite, b.glow], scale: b.baseScale * 1.08, duration: 100, yoyo: true, ease: 'Back.Out' });
       this.tweens.add({ targets: b.glow, alpha: 0.10, duration: 190, yoyo: true });
       this.time.delayedCall(250, () => this.setBinVisual(cat, 'closed'));
     } else if (state === 'wrong') {
       b.sprite.setTexture(b.openKey);
-      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.13).setAlpha(0.75);
-      this.tweens.add({ targets: b.container, x: '+=5', yoyo: true, repeat: 3, duration: 34 });
+      b.glow.setTexture(b.openGlowKey).setScale(b.baseScale * 1.13).setAlpha(0.75).setTint(0xFF566A);
+      this.tweens.add({ targets: b.container, x: b.baseX + 4, yoyo: true, repeat: 1, duration: 60, ease: 'Sine.InOut' });
       this.tweens.add({ targets: b.glow, alpha: 0.12, duration: 180, yoyo: true });
       this.time.delayedCall(250, () => this.setBinVisual(cat, 'closed'));
     }
@@ -458,17 +562,47 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  wasteSizing() {
+    const w = this.scale.width;
+    const { portrait, unit } = portraitMetrics(w, this.playHeight || this.scale.height);
+    return {
+      grabRadius: portrait ? Math.max(52, 108 * unit) : (w < 600 ? 82 : (w < 900 ? 78 : 74)),
+      maxVisual: portrait ? Math.max(96, 180 * unit) : (w < 600 ? 122 : (w < 900 ? 128 : 136)),
+      unit,
+      portrait,
+    };
+  }
+
+  resizeWasteItem(item) {
+    if (!item.wasteImage) return;
+    const { grabRadius, maxVisual, portrait, unit } = this.wasteSizing();
+    item.hitRadius = grabRadius;
+    item.wasteImage.setScale(Math.min(maxVisual / item.wasteImage.width, maxVisual / item.wasteImage.height));
+    item.grabHalo.setRadius(grabRadius);
+    item.innerHalo.setRadius(grabRadius - 8);
+    item.wasteShadow.setPosition(0, grabRadius * .52).setDisplaySize(grabRadius * 1.12, grabRadius * .30);
+    const badgeSize = portrait ? Math.max(10, 22 * unit) : 10;
+    item.dirtyBadge?.setPosition(grabRadius * .48, -grabRadius * .56).setFontSize(badgeSize);
+    item.rareBadge?.setPosition(-grabRadius * .50, -grabRadius * .56).setFontSize(badgeSize);
+    if (!item.isDragging && item.tutorialSlot === undefined) {
+      item.x = Phaser.Math.Clamp(item.x, grabRadius, this.scale.width - grabRadius);
+      item.y = Phaser.Math.Clamp(item.y, this.safeTop + grabRadius, Math.max(this.safeTop + grabRadius, this.binTop - grabRadius));
+    }
+  }
+
   tutorialSlotPosition(slot) {
     const w = this.scale.width;
-    const h = Math.min(this.scale.height, window.visualViewport?.height || this.scale.height);
-    const portrait = w < 650 && h > w;
-    if (portrait) {
-      const xs = [w * 0.30, w * 0.70];
-      const ys = [Math.max(this.safeTop + 78, h * 0.27), Math.max(this.safeTop + 235, h * 0.45)];
+    const h = this.playHeight || this.scale.height;
+    if (this.portraitLayout) {
+      const { grabRadius } = this.wasteSizing();
+      const top = this.safeTop + grabRadius + 30 * this.layoutUnit;
+      const bottom = Math.max(top, this.binTop - grabRadius - 70 * this.layoutUnit);
+      const xs = [w * .28, w * .72];
+      const ys = [top + (bottom - top) * .24, top + (bottom - top) * .72];
       return { x: xs[slot % 2], y: ys[Math.floor(slot / 2)] };
     }
-    const xs = [w * 0.17, w * 0.39, w * 0.61, w * 0.83];
-    return { x: xs[slot], y: Math.max(this.safeTop + 96, h * 0.30) };
+    const xs = [w * .17, w * .39, w * .61, w * .83];
+    return { x: xs[slot], y: Math.max(this.safeTop + 96, h * .30) };
   }
 
   positionTutorialItems() {
@@ -484,7 +618,7 @@ class GameScene extends Phaser.Scene {
   createTutorialItem(def, slot) {
     const pos = this.tutorialSlotPosition(slot);
     const w = this.scale.width;
-    const grabRadius = w < 600 ? 82 : (w < 900 ? 78 : 74);
+    const { grabRadius, maxVisual } = this.wasteSizing();
     const c = this.add.container(pos.x, pos.y).setDepth(10);
     c.wasteDef = def;
     c.cleaned = true;
@@ -500,11 +634,13 @@ class GameScene extends Phaser.Scene {
     const halo = this.add.circle(0, 0, grabRadius, 0xFFFFFF, 0.15).setStrokeStyle(4, 0xFFFFFF, 0.82);
     const innerHalo = this.add.circle(0, 0, grabRadius - 8, 0xDFF8FF, 0.04).setStrokeStyle(2, 0xDFF8FF, 0.30);
     const img = this.add.image(0, -2, 'w_' + def.id);
-    const maxVisual = w < 600 ? 122 : (w < 900 ? 128 : 136);
     const scale = Math.min(maxVisual / img.width, maxVisual / img.height);
     img.setScale(scale);
     c.add([shadow, halo, innerHalo, img]);
     c.grabHalo = halo;
+    c.wasteImage = img;
+    c.innerHalo = innerHalo;
+    c.wasteShadow = shadow;
     this.items.push(c);
     this.tweens.add({ targets: c, scale: { from: 0.78, to: 1 }, alpha: { from: 0, to: 1 }, duration: 260 + slot * 70, ease: 'Back.Out' });
     return c;
@@ -517,6 +653,7 @@ class GameScene extends Phaser.Scene {
   }
 
   startTutorial(player) {
+    resetVisualFeedback();
     this.clearItems();
     this.player = player || 'ผู้เล่น';
     this.tutorialPlayer = this.player;
@@ -531,6 +668,7 @@ class GameScene extends Phaser.Scene {
     hud.classList.add('hidden');
     tutorialHud?.classList.remove('hidden');
     this.updateTutorialProgress();
+    this.layout();
     showWaveBanner('ลองแยกขยะ 4 ประเภท');
 
     const tutorialIds = ['pet', 'banana', 'wrapper', 'battery'];
@@ -545,20 +683,19 @@ class GameScene extends Phaser.Scene {
     this.clearBinHover();
     tutorialHud?.classList.add('complete');
     if (tutorialProgressText) tutorialProgressText.textContent = 'พร้อมแล้ว!';
-    showWaveBanner('พร้อมแล้ว!');
     playSound('combo');
 
     const player = this.tutorialPlayer || this.player || 'ผู้เล่น';
     const steps = [
-      [420, '3'],
-      [980, '2'],
-      [1540, '1'],
-      [2100, 'เริ่ม!'],
+      [300, '3'],
+      [1200, '2'],
+      [2100, '1'],
+      [3000, 'เริ่ม!'],
     ];
     for (const [delay, label] of steps) {
-      this.time.delayedCall(delay, () => showWaveBanner(label));
+      this.time.delayedCall(delay, () => showWaveBanner(label, { mode: 'countdown' }));
     }
-    this.time.delayedCall(2500, () => {
+    this.time.delayedCall(3700, () => {
       tutorialHud?.classList.add('hidden');
       tutorialHud?.classList.remove('complete');
       hud.classList.remove('hidden');
@@ -567,6 +704,7 @@ class GameScene extends Phaser.Scene {
   }
 
   startRound(player) {
+    resetVisualFeedback();
     this.clearItems();
     this.tutorialMode = false;
     this.player = player || 'ผู้เล่น';
@@ -591,6 +729,7 @@ class GameScene extends Phaser.Scene {
     this.playing = true;
     this.setCleanZoneVisible(false, true);
     this.setCityStage(0, true);
+    this.layout();
     this.advanceWave(true);
     updateHud(this);
     playSound('start');
@@ -602,6 +741,11 @@ class GameScene extends Phaser.Scene {
     this.activePointerId = null;
     for (const o of this.items || []) o.destroy();
     this.items = [];
+    if (this.dropFeedbackNode) {
+      this.tweens.killTweensOf(this.dropFeedbackNode);
+      this.dropFeedbackNode.destroy();
+      this.dropFeedbackNode = null;
+    }
   }
 
   getWaveConfig(index) {
@@ -649,48 +793,53 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnItem() {
-    const mobilePortrait = this.scale.width < 600 && this.scale.height > this.scale.width;
-    const activeCap = mobilePortrait ? Math.min(this.currentWave.maxActive, 3) : this.currentWave.maxActive;
+    const activeCap = this.portraitLayout ? Math.min(this.currentWave.maxActive, this.scale.width < 600 ? 3 : 4) : this.currentWave.maxActive;
     if (this.spawnedInWave >= this.currentWave.quota || this.items.length >= activeCap) return;
 
     const def = this.randomDef();
     const w = this.scale.width;
     const h = this.scale.height;
-    const grabRadius = w < 600 ? 82 : (w < 900 ? 78 : 74);
+    const { grabRadius, maxVisual } = this.wasteSizing();
     const margin = grabRadius + 12;
-    const minGap = w < 600 ? 118 : 138;
+    const minGap = this.portraitLayout ? grabRadius * 2.05 : (w < 600 ? 118 : 138);
     let startX = Phaser.Math.Between(margin, Math.max(margin + 1, w - margin));
-    const startYBase = this.safeTop || (w < 600 ? 150 : 135);
+    const startYBase = this.safeTop + grabRadius + (this.portraitLayout ? 28 * this.layoutUnit : 12);
     let startY = Phaser.Math.Between(startYBase, startYBase + (w < 600 ? 76 : 96));
 
+    let foundSpace = false;
     for (let tries = 0; tries < 24; tries++) {
       const candidateX = Phaser.Math.Between(margin, Math.max(margin + 1, w - margin));
       const candidateY = Phaser.Math.Between(startYBase, startYBase + (w < 600 ? 84 : 110));
       const farEnough = this.items.every(it => Phaser.Math.Distance.Between(it.x, it.y, candidateX, candidateY) > minGap);
-      if (farEnough) {
+      const clearOfWash = !this.portraitLayout || !this.cleanUnlocked || Phaser.Math.Distance.Between(candidateX, candidateY, this.cleanCenter.x, this.cleanCenter.y) > this.cleanCenter.r + grabRadius + 16 * this.layoutUnit;
+      if (farEnough && clearOfWash) {
+        foundSpace = true;
         startX = candidateX;
         startY = candidateY;
         break;
       }
     }
 
+    if (this.portraitLayout && !foundSpace) return;
     const c = this.add.container(startX, startY).setDepth(10);
     c.wasteDef = def;
     c.cleaned = !def.dirty;
     c.isDragging = false;
     c.age = 0;
     c.hitRadius = grabRadius;
-    c.fallSpeed = Phaser.Math.Between(this.currentWave.speed[0], this.currentWave.speed[1]) + (this.storm ? 12 : 0);
+    c.fallSpeed = (Phaser.Math.Between(this.currentWave.speed[0], this.currentWave.speed[1]) + (this.storm ? 12 : 0)) * (this.portraitLayout ? this.playHeight / 900 : 1);
 
     const shadow = this.add.ellipse(0, grabRadius * 0.52, grabRadius * 1.12, grabRadius * 0.30, 0x26323D, 0.22);
     const halo = this.add.circle(0, 0, grabRadius, 0xFFFFFF, 0.13).setStrokeStyle(4, 0xFFFFFF, 0.72);
     const innerHalo = this.add.circle(0, 0, grabRadius - 8, 0xDFF8FF, 0.035).setStrokeStyle(2, 0xDFF8FF, 0.25);
     const img = this.add.image(0, -2, 'w_' + def.id);
-    const maxVisual = w < 600 ? 122 : (w < 900 ? 128 : 136);
     const scale = Math.min(maxVisual / img.width, maxVisual / img.height);
     img.setScale(scale);
     c.add([shadow, halo, innerHalo, img]);
     c.grabHalo = halo;
+    c.wasteImage = img;
+    c.innerHalo = innerHalo;
+    c.wasteShadow = shadow;
 
     if (def.dirty) {
       const dirty = this.add.text(grabRadius * 0.48, -grabRadius * 0.56, 'ล้างก่อน', {
@@ -704,45 +853,58 @@ class GameScene extends Phaser.Scene {
         fontFamily: 'Noto Sans Thai, sans-serif', fontSize: w < 600 ? '9px' : '10px', fontStyle: '900', color: '#5F4C80', backgroundColor: '#EFE7FF', padding: { x: 6, y: 4 }
       }).setOrigin(0.5);
       c.add(rare);
+      c.rareBadge = rare;
     }
 
+    this.resizeWasteItem(c);
     this.items.push(c);
     this.spawnedInWave += 1;
     this.tweens.add({ targets: c, scale: { from: 0.82, to: 1 }, alpha: { from: 0, to: 1 }, duration: 190, ease: 'Back.Out' });
   }
 
-  floatText(x, y, text, color = '#FF7FA8', size = 20) {
-    const t = this.add.text(x, y, text, {
-      fontFamily: 'Noto Sans Thai, sans-serif', fontSize: `${size}px`, fontStyle: '900', color, stroke: '#FFFFFF', strokeThickness: 6
-    }).setOrigin(0.5).setDepth(40);
-    this.tweens.add({ targets: t, y: y - 60, alpha: 0, scale: 1.12, duration: 680, ease: 'Cubic.Out', onComplete: () => t.destroy() });
+  dropFeedback(cat, label, tone = 'good', position = null) {
+    if (this.dropFeedbackNode) {
+      this.tweens.killTweensOf(this.dropFeedbackNode);
+      this.dropFeedbackNode.destroy();
+    }
+    const u = this.layoutUnit || 1;
+    const size = this.portraitLayout ? Math.max(14, 32 * u) : 20;
+    const text = this.add.text(0, 0, label, {
+      fontFamily: 'Noto Sans Thai, sans-serif', fontSize: size + 'px', fontStyle: 'bold', color: '#FFFDF5',
+      padding: { x: Math.max(8, 18 * u), y: Math.max(6, 12 * u) },
+    }).setOrigin(.5);
+    const plate = this.add.graphics();
+    const color = tone === 'wrong' ? 0x842C3D : tone === 'neutral' ? 0x48415C : 0x164D3B;
+    plate.fillStyle(color, 1).fillRoundedRect(-text.width / 2, -text.height / 2, text.width, text.height, Math.max(10, 18 * u));
+    const bin = this.bins[cat];
+    const x = Phaser.Math.Clamp(position?.x ?? bin?.container.x ?? this.scale.width / 2, text.width / 2 + 10, this.scale.width - text.width / 2 - 10);
+    const y = position?.y ?? this.binTop - Math.max(18, 34 * u);
+    const node = this.add.container(x, y, [plate, text]).setDepth(45);
+    this.dropFeedbackNode = node;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.time.delayedCall(reduced ? 600 : 380, () => {
+      if (!node.active) return;
+      if (reduced) {
+        node.destroy();
+        if (this.dropFeedbackNode === node) this.dropFeedbackNode = null;
+        return;
+      }
+      this.tweens.add({ targets: node, y: y - Math.max(12, 28 * u), alpha: 0, duration: 220, ease: 'Sine.In', onComplete: () => {
+        node.destroy();
+        if (this.dropFeedbackNode === node) this.dropFeedbackNode = null;
+      } });
+    });
   }
 
   comboFeedback() {
     if (this.combo < 3) return;
-    let label = `COMBO x${this.combo}`;
-    let color = '#FF78A8';
-    let size = 22;
-    if (this.combo >= 10) {
-      label = `SUPER COMBO x${this.combo}`;
-      color = '#FFB52E';
-      size = 32;
-    } else if (this.combo >= 7) {
-      label = `GREAT COMBO x${this.combo}`;
-      color = '#9B7AF1';
-      size = 28;
-    } else if (this.combo >= 4) {
-      label = `COMBO x${this.combo}`;
-      color = '#FF6FA2';
-      size = 25;
-    }
-    this.floatText(this.scale.width * 0.5, Math.max(122, this.safeTop - 10), label, color, size);
+    clearTimeout(comboTimer);
+    comboCard?.classList.remove('is-celebrating');
+    void comboCard?.offsetWidth;
+    comboCard?.classList.add('is-celebrating');
+    comboTimer = setTimeout(() => comboCard?.classList.remove('is-celebrating'), 350);
     if ([4, 7, 10].includes(this.combo) || (this.combo > 10 && this.combo % 5 === 0)) {
       playSound('combo');
-      const edge = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width - 10, this.scale.height - 10, 0xFFFFFF, 0)
-        .setStrokeStyle(this.combo >= 10 ? 10 : 7, Phaser.Display.Color.HexStringToColor(color).color, 0.55)
-        .setDepth(42);
-      this.tweens.add({ targets: edge, alpha: { from: 0.85, to: 0 }, duration: 430, ease: 'Cubic.Out', onComplete: () => edge.destroy() });
       comboCard?.classList.remove('hot');
       void comboCard?.offsetWidth;
       comboCard?.classList.add('hot');
@@ -773,18 +935,19 @@ class GameScene extends Phaser.Scene {
       if (hit !== def.category) {
         playSound('wrong');
         this.setBinVisual(hit, 'wrong');
-        toast('ลองอีกครั้ง', 'wrong');
+        wrongEdge();
+        this.dropFeedback(hit, '✕ ผิดถัง · ลองอีกครั้ง', 'wrong');
         this.tweens.add({ targets: obj, x: obj.homeX, y: obj.homeY, duration: 260, ease: 'Back.Out' });
         return;
       }
 
       playSound('correct');
       this.setBinVisual(hit, 'success');
-      this.spark(obj.x, obj.y, Phaser.Display.Color.HexStringToColor(CATEGORIES[hit].color).color);
+      this.spark(this.bins[hit].container.x, this.binTop + 24 * this.layoutUnit, 0x8CE1A6);
       this.removeItem(obj);
       this.tutorialCorrect += 1;
       this.updateTutorialProgress();
-      toast('ถูกต้อง!', 'good');
+      this.dropFeedback(hit, '✓ ถูกต้อง!');
       if (this.tutorialCorrect >= 4) this.time.delayedCall(420, () => this.finishTutorial());
       return;
     }
@@ -795,13 +958,13 @@ class GameScene extends Phaser.Scene {
         obj.dirtyBadge?.setText('สะอาดแล้ว').setBackgroundColor('#D8F3E3').setColor('#4A7F5E');
         this.score += 25;
         playSound('clean');
-        toast('ล้างแล้ว +25', 'clean');
+        this.dropFeedback(null, '✓ ล้างแล้ว +25', 'good', { x: this.cleanCenter.x, y: this.cleanCenter.y + this.cleanCenter.r + 24 * this.layoutUnit });
         this.spark(obj.x, obj.y, 0x82D6D2);
         this.tweens.add({ targets: obj, x: Math.max(110, this.cleanCenter.x - 135), y: this.cleanCenter.y + 105, duration: 260, ease: 'Back.Out' });
         updateHud(this);
         return;
       }
-      toast('ชิ้นนี้ไม่ต้องล้าง', 'neutral');
+      this.dropFeedback(null, 'ชิ้นนี้ไม่ต้องล้าง', 'neutral', { x: this.cleanCenter.x, y: this.cleanCenter.y + this.cleanCenter.r + 24 * this.layoutUnit });
       return;
     }
 
@@ -820,7 +983,8 @@ class GameScene extends Phaser.Scene {
     if (def.category === 'recycle' && def.dirty && !obj.cleaned) {
       this.combo = 0;
       this.score = Math.max(0, this.score - 15);
-      toast('ต้องล้างก่อน -15', 'wrong');
+      wrongEdge();
+      this.dropFeedback(hit, '✕ ต้องล้างก่อน −15', 'wrong');
       playSound('wrong');
       this.setBinVisual(hit, 'wrong');
       this.tweens.add({ targets: obj, x: Math.max(110, this.cleanCenter.x - 135), y: this.cleanCenter.y + 105, duration: 260, ease: 'Back.Out' });
@@ -833,10 +997,9 @@ class GameScene extends Phaser.Scene {
       this.combo = 0;
       this.score = Math.max(0, this.score - 45);
       playSound('wrong');
-      toast('ยังไม่ถูก -45', 'wrong');
-      this.cameras.main.shake(120, 0.004);
+      wrongEdge();
+      this.dropFeedback(hit, '✕ ผิดถัง −45', 'wrong');
       this.setBinVisual(hit, 'wrong');
-      this.floatText(obj.x, obj.y - 10, 'พลาด!', '#E46788', 18);
       this.removeItem(obj);
       updateHud(this);
       this.checkWaveComplete();
@@ -855,9 +1018,9 @@ class GameScene extends Phaser.Scene {
 
     playSound('correct');
     this.setBinVisual(hit, 'success');
-    this.spark(obj.x, obj.y, Phaser.Display.Color.HexStringToColor(CATEGORIES[hit].color).color);
+    this.spark(this.bins[hit].container.x, this.binTop + 24 * this.layoutUnit, 0x8CE1A6);
     this.removeItem(obj);
-    this.floatText(obj.x, obj.y - 14, `+${Math.round(gained)}`, '#F48BB5', 20);
+    this.dropFeedback(hit, `✓ ถูกต้อง +${Math.round(gained)}`);
     this.comboFeedback();
 
     const stage = this.impact >= 2.4 ? 3 : this.impact >= 1.35 ? 2 : this.impact >= 0.55 ? 1 : 0;
@@ -873,9 +1036,7 @@ class GameScene extends Phaser.Scene {
       const clearBonus = 120 + this.waveIndex * 30;
       this.score += clearBonus;
       updateHud(this);
-      showWaveBanner(`ผ่านเวฟ ${this.waveIndex}! +${clearBonus}`);
-      this.floatText(this.scale.width / 2, this.scale.height * 0.34, `ผ่านเวฟ ${this.waveIndex}!`, '#53C987', 32);
-      this.spark(this.scale.width / 2, this.scale.height * 0.38, 0xF4B93B);
+      showWaveBanner(`✓ ผ่านเวฟ ${this.waveIndex} · +${clearBonus} คะแนน`);
       this.waveWaiting = true;
       this.time.delayedCall(900, () => {
         if (this.playing && this.timeLeft > 0.1) this.advanceWave();
@@ -884,11 +1045,14 @@ class GameScene extends Phaser.Scene {
   }
 
   spark(x, y, color) {
-    for (let i = 0; i < 16; i++) {
-      const p = this.add.circle(x, y, Phaser.Math.Between(3, 7), color, 1).setDepth(28);
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    for (let i = 0; i < (reduced ? 3 : 8); i++) {
+      const p = this.portraitLayout && i % 4 === 0 && !reduced
+        ? this.add.text(x, y, i % 8 === 0 ? '✦' : '🍃', { fontSize: Math.max(16, 28 * this.layoutUnit) + 'px', color: '#fff5b7' }).setOrigin(.5).setDepth(28)
+        : this.add.circle(x, y, Phaser.Math.FloatBetween(2, Math.max(3, 6 * this.layoutUnit)), color, 1).setDepth(28);
       const a = Phaser.Math.FloatBetween(0, Math.PI * 2);
-      const d = Phaser.Math.Between(35, 110);
-      this.tweens.add({ targets: p, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, alpha: 0, scale: 0.2, duration: Phaser.Math.Between(320, 620), ease: 'Cubic.Out', onComplete: () => p.destroy() });
+      const d = Phaser.Math.FloatBetween(Math.max(18, 40 * this.layoutUnit), Math.max(30, 70 * this.layoutUnit));
+      this.tweens.add({ targets: p, x: x + Math.cos(a) * d, y: y + Math.sin(a) * d, alpha: 0, scale: 0.2, duration: reduced ? 200 : Phaser.Math.Between(350, 500), ease: 'Cubic.Out', onComplete: () => p.destroy() });
     }
   }
 
@@ -918,7 +1082,7 @@ class GameScene extends Phaser.Scene {
     if (this.timeLeft <= 15 && !this.storm) {
       this.storm = true;
       showStorm();
-      for (const item of this.items) item.fallSpeed += 12;
+      for (const item of this.items) item.fallSpeed += 12 * (this.portraitLayout ? this.playHeight / 900 : 1);
     }
 
     if (!this.waveWaiting) {
@@ -930,7 +1094,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    const floor = this.scale.height - Math.max(180, this.scale.height * 0.23);
+    const floor = this.portraitLayout ? this.binTop + 20 * this.layoutUnit : this.scale.height - Math.max(180, this.scale.height * 0.23);
     for (const obj of [...this.items]) {
       if (obj.isDragging) continue;
       obj.age += dt;
@@ -940,7 +1104,7 @@ class GameScene extends Phaser.Scene {
         this.missed += 1;
         this.combo = 0;
         this.score = Math.max(0, this.score - 20);
-        toast('พลาดหนึ่งชิ้น -20', 'wrong');
+        this.dropFeedback(null, 'หลุดไปหนึ่งชิ้น −20', 'wrong');
         playSound('wrong');
         this.removeItem(obj);
         this.checkWaveComplete();
@@ -958,6 +1122,7 @@ class GameScene extends Phaser.Scene {
     this.clearBinHover();
     updateHud(this);
     this.clearItems();
+    resetVisualFeedback();
     showEndLeaderboard(this);
   }
 }
@@ -990,17 +1155,26 @@ async function init() {
 }
 
 startBtn.addEventListener('click', () => {
+  if (!sceneRef || startBtn.disabled) return;
   makeSounds();
   const name = (playerInput.value.trim() || 'ผู้เล่น').slice(0, 12);
-  startScreen.classList.add('hidden');
-  leaderboardScreen.classList.add('hidden');
-  hud.classList.remove('hidden');
-  sceneRef?.startTutorial(name);
+  playerInput.blur();
+  startBtn.disabled = true;
+  startScreen.classList.add('starting');
+  setTimeout(() => {
+    startScreen.classList.add('hidden');
+    startScreen.classList.remove('starting');
+    leaderboardScreen.classList.add('hidden');
+    hud.classList.remove('hidden');
+    sceneRef.startTutorial(name);
+    startBtn.disabled = false;
+  }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 240);
 });
 
 openLeaderboardBtn.addEventListener('click', openLeaderboardFromMenu);
 
 nextPlayerBtn.addEventListener('click', () => {
+  resetVisualFeedback();
   leaderboardScreen.classList.add('hidden');
   leaderboardScreen.classList.remove('browse-only');
   tutorialHud?.classList.add('hidden');

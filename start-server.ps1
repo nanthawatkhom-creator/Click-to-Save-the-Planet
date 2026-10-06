@@ -53,7 +53,7 @@ $listener.Start()
 
 $url = "http://127.0.0.1:$Port/$OpenPage"
 Write-Host ""
-Write-Host "แยกให้ถูก! — Sort It Right! local server" -ForegroundColor Cyan
+Write-Host "Click to Save the Planet local server" -ForegroundColor Cyan
 Write-Host "Game URL: $url" -ForegroundColor Green
 Write-Host "Keep this window open while playing. Press Ctrl+C to stop." -ForegroundColor Yellow
 Write-Host ""
