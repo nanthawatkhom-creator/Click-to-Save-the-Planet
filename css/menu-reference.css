@@ -50,6 +50,7 @@
   height:clamp(180px,16vw,250px);
   object-fit:contain;
   filter:drop-shadow(0 5px 0 rgba(255,255,255,.22));
+  animation:referenceTitleBreath 6.8s ease-in-out infinite;
 }
 .menu-v29.menu-reference .planet-wordmark[hidden] {display:none}
 .menu-v29.menu-reference .planet-title:has(.planet-wordmark:not([hidden])) > span,
@@ -264,7 +265,36 @@
 .menu-v29.menu-reference.starting .menu-mascot-slot .menu-mascot {animation:planetCheer .24s ease-out both}
 @keyframes referenceMascotFloat {
   0%,100% {transform:translateY(0) rotate(-1deg)}
-  50% {transform:translateY(-7px) rotate(1.5deg)}
+  50% {transform:translateY(-12px) rotate(2deg)}
+}
+@keyframes referenceTitleBreath {
+  0%,100% {transform:scale(1)}
+  50% {transform:scale(1.012)}
+}
+.menu-motion-btn {
+  position:absolute;
+  z-index:10;
+  top:max(12px,calc(18 * var(--booth-unit)));
+  right:max(12px,calc(18 * var(--booth-unit)));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:44px;
+  padding:8px 13px;
+  border:2px solid rgba(255,255,255,.94);
+  border-radius:999px;
+  background:rgba(248,255,238,.95);
+  color:#245a43;
+  box-shadow:0 4px 12px rgba(37,80,58,.1);
+  font:600 clamp(12px,calc(18 * var(--booth-unit)),18px) 'Noto Sans Thai',sans-serif;
+  cursor:pointer;
+}
+.menu-motion-btn[aria-pressed="true"] {background:#e4f6bd;border-color:#fff}
+.menu-motion-btn:focus-visible {outline:3px solid #235d45;outline-offset:3px}
+@media(max-width:360px) {
+  .menu-motion-btn {gap:4px;padding:8px}
+  .menu-motion-label {display:none}
 }
 
 /* One screen composition on the 1080 × 1920 booth. */
@@ -474,8 +504,4 @@
   html:not(.booth-portrait) .menu-v29.menu-reference .name-field input {height:55px;font-size:17px}
   html:not(.booth-portrait) .menu-v29.menu-reference .menu-start-btn {height:61px;font-size:26px!important}
   html:not(.booth-portrait) .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {height:52px;font-size:18px}
-}
-@media(prefers-reduced-motion:reduce) {
-  .menu-v29.menu-reference .menu-mascot-slot .menu-mascot,
-  .menu-v29.menu-reference.starting .menu-mascot-slot .menu-mascot {animation:none!important}
 }

@@ -1168,7 +1168,7 @@ startBtn.addEventListener('click', () => {
     hud.classList.remove('hidden');
     sceneRef.startTutorial(name);
     startBtn.disabled = false;
-  }, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 240);
+  }, document.documentElement.dataset.menuMotion === 'off' ? 0 : 240);
 });
 
 openLeaderboardBtn.addEventListener('click', openLeaderboardFromMenu);

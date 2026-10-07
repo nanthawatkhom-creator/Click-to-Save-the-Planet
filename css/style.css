@@ -172,7 +172,6 @@ body{position:fixed;inset:0}
 @media(max-height:760px) and (min-width:1021px){
   .menu-shell{width:min(1280px,95vw);padding:18px 0;gap:36px}.sdg-badge{height:44px}.sdg-badge img{width:32px;height:32px}.sdg-badge strong{font-size:13px}.menu-title{margin:7px 0 4px}.title-dark{font-size:70px}.title-pink{font-size:76px}.mission-pill{font-size:17px;margin:2px 0 5px}.timer-mark{width:31px;height:31px;border-width:3px;font-size:18px}.menu-description{font-size:12px;line-height:1.45;margin-bottom:9px}.waste-art{height:92px}.waste-card{border-radius:18px;padding:5px}.waste-name{min-height:27px;font-size:11px;margin-top:-6px}.waste-card p{font-size:8.5px;margin-top:3px}.play-panel{padding:79px 28px 18px}.menu-mascot{width:122px;height:122px;top:-37px}.play-panel h2{font-size:29px}.play-hint{margin-bottom:12px}.name-field input{height:50px}.menu-start-btn{height:53px;font-size:19px!important;margin-top:10px}.menu-round-note{padding:7px;margin-top:9px}.clock-dot{width:19px;height:19px}
 }
-@media(prefers-reduced-motion:reduce){.menu-bg,.menu-decor,.menu-info,.play-panel-wrap,.menu-mascot,.title-leaf,.panel-leaf,.mascot-accent,.waste-card,.menu-start-btn:before,.timer-mark{animation:none!important}}
 
 
 /* v2.9 — hierarchy + spacing polish */

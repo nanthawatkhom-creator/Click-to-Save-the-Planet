@@ -114,7 +114,6 @@
 .booth-portrait .result-external-action{width:min(calc(880 * var(--booth-unit)),92vw)}
 .booth-portrait .result-external-action .primary-btn{height:max(52px,calc(100 * var(--booth-unit)));font-size:max(18px,calc(34 * var(--booth-unit)))}
 @media(max-width:480px){.booth-portrait .menu-v29 .menu-shell{width:92vw}.booth-portrait .menu-v29 .waste-guide{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.booth-portrait .menu-v29 .waste-art{height:82px}.booth-portrait .menu-v29 .waste-card{padding:6px}.booth-portrait .menu-v29 .waste-name{font-size:12px}.booth-portrait .menu-v29 .waste-items img{width:24px;height:24px}}
-@media(prefers-reduced-motion:reduce){.menu-v29 .menu-mascot-slot .menu-mascot,.ambient-leaf,.ambient-star,.menu-bg,.waste-card,.menu-start-btn{animation:none!important}.menu-v29.starting .menu-mascot{animation:none!important}}
 
 .booth-portrait .mascot-accent{top:calc(38 * var(--booth-unit));right:calc(54 * var(--booth-unit));width:max(6px,calc(12 * var(--booth-unit)));height:max(14px,calc(38 * var(--booth-unit)))}
 .booth-portrait .mascot-accent.accent-b{top:calc(70 * var(--booth-unit));right:calc(32 * var(--booth-unit));height:max(10px,calc(27 * var(--booth-unit)))}
@@ -228,7 +227,7 @@
 @keyframes planetAura{0%,100%{opacity:.7;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
 @keyframes planetAuraCheer{0%{opacity:.7;transform:scale(1)}55%{opacity:1;transform:scale(1.12)}100%{opacity:.8;transform:scale(1)}}
 @keyframes mascotSparkles{0%,100%{opacity:.4;transform:translateY(0) scale(.9)}50%{opacity:.9;transform:translateY(-4px) scale(1.06)}}
-@keyframes guideIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(calc(-3 * var(--booth-unit)))}}
+@keyframes guideIdle{0%,100%{transform:translateY(0)}50%{transform:translateY(clamp(-8px,calc(-7 * var(--booth-unit)),-5px))}}
 
 /* Countdown and notices use one legible plate rather than text on scenery. */
 #wave-banner.wave-banner{
@@ -312,19 +311,19 @@
 #toast.toast.show{animation:planetNotice 2s ease-out both}
 
 @media(prefers-reduced-motion:reduce){
-  .menu-v29 .menu-info,.menu-v29 .play-panel-wrap,
-  .menu-v29 .menu-mascot-slot .menu-mascot,
-  .menu-mascot-slot:before,.menu-mascot-slot:after,
-  .menu-v29.starting .menu-mascot-slot .menu-mascot,
-  .menu-v29.starting .menu-mascot-slot:before,
-  .ambient-leaf,.ambient-star,.menu-bg,.menu-decor,
-  .title-leaf,.timer-mark,.mascot-accent,.panel-leaf,
-  .menu-v29 .waste-card,.menu-v29 .menu-start-btn,
-  .menu-v29 .menu-start-btn:before,#hud-impact.is-updated,
+  html:not([data-menu-motion="on"]) #start-screen,
+  html:not([data-menu-motion="on"]) #start-screen *,
+  html:not([data-menu-motion="on"]) #start-screen *:before,
+  html:not([data-menu-motion="on"]) #start-screen *:after{animation:none!important;transition:none!important}
+  #hud-impact.is-updated,
   .hud-card.combo.is-celebrating strong{animation:none!important}
   #wave-banner.wave-banner[data-mode="countdown"].show{animation:messageFade .82s linear both}
   #wave-banner.wave-banner[data-mode="notice"].show,#toast.toast.show{animation:messageFade 2s linear both}
   #feedback-edge.feedback-edge.show{animation:edgeFeedbackReduced .24s linear both}
 }
+html[data-menu-motion="off"] #start-screen,
+html[data-menu-motion="off"] #start-screen *,
+html[data-menu-motion="off"] #start-screen *:before,
+html[data-menu-motion="off"] #start-screen *:after{animation:none!important;transition:none!important}
 @keyframes messageFade{0%,100%{opacity:0}10%,86%{opacity:1}}
 @keyframes edgeFeedbackReduced{0%,100%{opacity:0}20%,55%{opacity:.4}}

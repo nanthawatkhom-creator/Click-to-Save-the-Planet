@@ -12,12 +12,13 @@
   <meta property="og:image" content="https://nanthawatkhom-creator.github.io/trash-sorter-game/media/game-cover.png" />
   <link rel="icon" href="data:," />
   <title>Click to Save the Planet</title>
+  <script src="js/menu-motion.js?v=2026-10-07-motion-control"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2026-10-05-desktop-button" />
-  <link rel="stylesheet" href="css/booth.css?v=planet-feedback-2" />
-  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-06-portrait-booth" />
+  <link rel="stylesheet" href="css/style.css?v=2026-10-07-motion-control" />
+  <link rel="stylesheet" href="css/booth.css?v=2026-10-07-motion-control" />
+  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-07-motion-control" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js'"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/howler@2.2.4/howler.min.js'"></script>
 </head>
@@ -40,6 +41,7 @@
   <div id="wave-banner" class="wave-banner hidden" role="status" aria-live="polite">เวฟ 1</div>
 
   <section id="start-screen" class="screen start-screen menu-v28 menu-v29 menu-reference">
+    <button id="menu-motion-btn" class="menu-motion-btn" type="button" aria-label="ลูกเล่นหน้าเมนู" aria-pressed="false"><span aria-hidden="true">✦</span><span class="menu-motion-label">ลูกเล่น:</span><b id="menu-motion-status">ปิด</b></button>
     <div class="menu-backdrop" aria-hidden="true"><img class="menu-bg" src="assets/menu/bg.png" alt="" /></div>
 
     <div class="menu-atmosphere" aria-hidden="true">
@@ -173,6 +175,6 @@
     </div>
   </section>
 </div>
-<script type="module" src="js/game.js?v=planet-feedback-2"></script>
+<script type="module" src="js/game.js?v=2026-10-07-motion-control"></script>
 </body>
 </html>
