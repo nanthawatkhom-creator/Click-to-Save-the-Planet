@@ -2,7 +2,9 @@
 
 **เกมคัดแยกขยะภาษาไทยที่เหมาะสำหรับจอบูทแนวตั้ง 9:16 (แนะนำ 1080×1920)** ออกแบบหน้า Main Menu ให้ครบในจอเดียว พร้อมปุ่มขนาดเหมาะกับหน้าจอสัมผัส แยกขยะให้ถูกประเภท ทำคะแนนและคอมโบให้สูงที่สุดในเวลา 75 วินาที
 
-![หน้าเมนูเกม Click to Save the Planet](media/game-cover.png)
+![หน้าเมนูเกม Click to Save the Planet]
+<img width="1079" height="1919" alt="image" src="https://github.com/user-attachments/assets/b391085b-deab-4de5-b60f-7b5bb4c634c0" />
+
 
 ## เล่นออนไลน์
 
@@ -15,7 +17,8 @@
 3. ลากขยะลงถังให้ตรงประเภท: ขยะทั่วไป รีไซเคิล ขยะเปียก และขยะอันตราย
 4. ทำคะแนนและคอมโบให้สูงที่สุดภายใน 75 วินาที
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/af399098-b699-423d-88fd-6a4df616a537" />
+<img width="1079" height="1917" alt="image" src="https://github.com/user-attachments/assets/e1d948ba-38b2-430e-8325-e3922cfc6067" />
+
 
 เล่นได้ด้วยเมาส์หรือหน้าจอสัมผัส มีโหมดบูทจอแนวตั้ง 9:16 เช่น 1080×1920 โดยจัดหน้าเริ่มเกมให้ครบในจอเดียว ปรับขนาดปุ่มและวัตถุตามพื้นที่จอ และรองรับการลดการเคลื่อนไหวตามการตั้งค่าเบราว์เซอร์ แนะนำ Chrome หรือ Edge และกด `F11` เพื่อแสดงผลเต็มจอที่บูท
 
@@ -27,7 +30,8 @@
 
 เกมแสดงอันดับหลังจบรอบ และเก็บ 50 คะแนนสูงสุดไว้ในพื้นที่จัดเก็บข้อมูลของเบราว์เซอร์ (`localStorage`) บนอุปกรณ์ที่เล่น ลักษณะการเก็บจะคล้ายคุกกี้ คือข้อมูลอยู่กับเบราว์เซอร์และเครื่องนั้น ผู้เล่นหลายคนที่ผลัดกันเล่นบนเครื่องและเบราว์เซอร์เดียวกันจึงใช้อันดับร่วมกันได้ แต่คะแนนจะไม่ซิงก์ไปยังเครื่องหรือเบราว์เซอร์อื่น และอาจหายไปเมื่อผู้ใช้ล้างข้อมูลเว็บไซต์ของเบราว์เซอร์
 
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/3a969777-5bc3-44b6-8a20-df3a1aa3095b" />
+<img width="1077" height="1919" alt="image" src="https://github.com/user-attachments/assets/5f66dfa5-b010-404e-adcb-d5031bba7ace" />
+
 
 
 หากต้องการอันดับออนไลน์ร่วมกัน ให้ตั้งค่า Firebase ตาม [FIREBASE_SETUP.md](FIREBASE_SETUP.md) และเปิดใช้ Firestore ก่อน ระบบ Firebase ยังไม่ได้เปิดใน Repository นี้
@@ -47,7 +51,6 @@
 
 - โค้ดเกมและไฟล์ README: [github.com/nanthawatkhom-creator/trash-sorter-game](https://github.com/nanthawatkhom-creator/trash-sorter-game)
 - เว็บไซต์เกม: [nanthawatkhom-creator.github.io/trash-sorter-game](https://nanthawatkhom-creator.github.io/trash-sorter-game/)
-- Portfolio: [nanthawatkhom-creator.github.io](https://nanthawatkhom-creator.github.io/)
 
 ### พรีวิวจอบูทบนคอมพิวเตอร์
 
