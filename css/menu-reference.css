@@ -162,15 +162,15 @@
   display:flex;
   align-items:flex-end;
   justify-content:center;
-  width:260px;
-  height:215px;
-  margin:0 0 -24px;
+  width:280px;
+  height:270px;
+  margin:0;
   transform:none;
 }
 .menu-v29.menu-reference .menu-mascot-slot .menu-mascot {
   position:relative;
   left:auto;
-  top:16px;
+  top:0;
   width:100%;
   height:100%;
   object-fit:contain;
@@ -193,13 +193,14 @@
   max-width:500px;
   min-height:0;
   padding:30px 34px 28px;
-  border:4px solid rgba(255,255,255,.98);
-  border-radius:42px;
-  background:linear-gradient(135deg,rgba(255,255,255,.99),rgba(252,255,244,.95));
-  box-shadow:0 24px 45px rgba(41,83,48,.13),inset 0 2px 0 white;
+  border:4px solid transparent;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+  backdrop-filter:none;
 }
 .menu-v29.menu-reference .play-panel:before {
-  background:radial-gradient(circle at -7% 29%,rgba(244,196,211,.20),transparent 25%),radial-gradient(circle at 101% 95%,rgba(188,232,107,.17),transparent 34%);
+  content:none;
 }
 .menu-v29.menu-reference .play-panel h2 {
   font-size:38px;
@@ -207,6 +208,7 @@
   color:#1e544d;
   font-weight:700;
   letter-spacing:-.035em;
+  text-shadow:0 2px 0 rgba(255,255,255,.85),0 0 18px rgba(255,255,255,.8);
 }
 .menu-v29.menu-reference .scribble {
   width:180px;
@@ -217,7 +219,7 @@
 .menu-v29.menu-reference .scribble b {display:none}
 .menu-v29.menu-reference .play-hint,
 .menu-v29.menu-reference .menu-round-note {display:none!important}
-.menu-v29.menu-reference .play-panel label {margin-bottom:8px;font-size:18px;line-height:1.25}
+.menu-v29.menu-reference .play-panel label {margin-bottom:8px;font-size:18px;line-height:1.25;text-shadow:0 1px 0 white,0 0 10px white}
 .menu-v29.menu-reference .name-field input {
   height:68px;
   padding-left:58px;
@@ -237,26 +239,13 @@
 .menu-v29.menu-reference .menu-start-btn {
   height:73px;
   min-height:0;
-  margin-top:14px;
+  margin-top:0;
   border-radius:24px!important;
   background:linear-gradient(105deg,#ff4d9a,#ff7e7c 53%,#ffc559)!important;
   font-size:30px!important;
   box-shadow:0 12px 24px rgba(244,99,141,.2)!important;
 }
 .menu-v29.menu-reference .menu-start-btn i {margin-left:20px}
-.menu-v29.menu-reference .play-panel > #open-leaderboard-btn {
-  height:64px;
-  min-height:0;
-  margin-top:12px;
-  gap:13px;
-  border:2px solid #c7e1cf;
-  border-radius:23px;
-  color:#236c52;
-  background:linear-gradient(180deg,#fcfffc,#edf8ec);
-  font-size:21px;
-  box-shadow:0 6px 14px rgba(63,100,60,.06);
-}
-.menu-v29.menu-reference .play-panel > #open-leaderboard-btn > span {font-size:1.25em}
 .menu-v29.menu-reference .panel-leaf {opacity:.65}
 .menu-v29.menu-reference .panel-leaf-a {top:25%;right:8px}
 .menu-v29.menu-reference .panel-leaf-b {bottom:20px;left:-12px}
@@ -355,11 +344,11 @@
   padding:0;
 }
 .booth-portrait .menu-v29.menu-reference .menu-mascot-slot {
-  width:calc(380 * var(--booth-unit));
-  height:calc(330 * var(--booth-unit));
-  margin-bottom:calc(-30 * var(--booth-unit));
+  width:calc(400 * var(--booth-unit));
+  height:calc(390 * var(--booth-unit));
+  margin-bottom:0;
 }
-.booth-portrait .menu-v29.menu-reference .menu-mascot-slot .menu-mascot {height:100%;width:100%;top:calc(20 * var(--booth-unit))}
+.booth-portrait .menu-v29.menu-reference .menu-mascot-slot .menu-mascot {height:100%;width:100%;top:0}
 .booth-portrait .menu-v29.menu-reference .menu-mascot-slot:after {
   font-size:calc(34 * var(--booth-unit));
   text-shadow:calc(-350 * var(--booth-unit)) calc(75 * var(--booth-unit)) 0 #fff2ad,calc(-10 * var(--booth-unit)) calc(172 * var(--booth-unit)) 0 #efffcf;
@@ -407,7 +396,7 @@
 }
 .booth-portrait .menu-v29.menu-reference .menu-start-btn {
   height:calc(98 * var(--booth-unit));
-  margin-top:calc(14 * var(--booth-unit));
+  margin-top:0;
   border-radius:calc(28 * var(--booth-unit))!important;
   font-size:calc(47 * var(--booth-unit))!important;
 }
@@ -416,14 +405,6 @@
   border-top-width:calc(18 * var(--booth-unit));
   border-bottom-width:calc(18 * var(--booth-unit));
   border-left-width:calc(28 * var(--booth-unit));
-}
-.booth-portrait .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {
-  height:calc(86 * var(--booth-unit));
-  margin-top:calc(12 * var(--booth-unit));
-  gap:calc(20 * var(--booth-unit));
-  border-width:calc(2 * var(--booth-unit));
-  border-radius:calc(27 * var(--booth-unit));
-  font-size:calc(32 * var(--booth-unit));
 }
 .booth-portrait .menu-v29.menu-reference .mascot-accent {
   top:calc(30 * var(--booth-unit));
@@ -471,8 +452,8 @@
   .booth-portrait .menu-v29.menu-reference .mission-pill {min-height:36px;padding:5px 13px;font-size:13px;gap:7px}
   .booth-portrait .menu-v29.menu-reference .timer-mark {width:24px;height:24px;border-width:2px;font-size:15px}
   .booth-portrait .menu-v29.menu-reference .play-panel-wrap {width:100%}
-  .booth-portrait .menu-v29.menu-reference .menu-mascot-slot {width:145px;height:120px;margin-bottom:-13px}
-  .booth-portrait .menu-v29.menu-reference .play-panel {padding:19px 18px 20px;border:3px solid white;border-radius:29px}
+  .booth-portrait .menu-v29.menu-reference .menu-mascot-slot {width:165px;height:160px;margin-bottom:0}
+  .booth-portrait .menu-v29.menu-reference .play-panel {padding:19px 18px 20px;border:3px solid transparent;border-radius:0}
   .booth-portrait .menu-v29.menu-reference .play-panel h2 {font-size:28px}
   .booth-portrait .menu-v29.menu-reference .scribble {width:125px;height:10px;margin:3px auto 12px}
   .booth-portrait .menu-v29.menu-reference .scribble i {height:3px}
@@ -480,9 +461,8 @@
   .booth-portrait .menu-v29.menu-reference .name-field input {height:49px;border-width:1.5px;border-radius:14px;padding-left:43px;font-size:16px}
   .booth-portrait .menu-v29.menu-reference .name-icon {left:18px;width:14px;height:14px;margin-top:-3px}
   .booth-portrait .menu-v29.menu-reference .name-icon:after {width:21px;height:10px;left:-3px;top:14px}
-  .booth-portrait .menu-v29.menu-reference .menu-start-btn {height:52px;margin-top:10px;border-radius:16px!important;font-size:25px!important}
+  .booth-portrait .menu-v29.menu-reference .menu-start-btn {height:52px;margin-top:0;border-radius:16px!important;font-size:25px!important}
   .booth-portrait .menu-v29.menu-reference .menu-start-btn i {border-top-width:10px;border-bottom-width:10px;border-left-width:15px;margin-left:14px}
-  .booth-portrait .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {height:46px;margin-top:9px;border-width:1.5px;border-radius:15px;font-size:17px;gap:9px}
   .booth-portrait .menu-v29.menu-reference .waste-guide {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
   .booth-portrait .menu-v29.menu-reference .waste-card {height:auto;padding:8px;border-width:3px;border-radius:25px}
   .booth-portrait .menu-v29.menu-reference .waste-art {height:108px}
@@ -498,10 +478,9 @@
   html:not(.booth-portrait) .menu-v29.menu-reference .mission-pill {min-height:45px;margin-bottom:13px;font-size:17px}
   html:not(.booth-portrait) .menu-v29.menu-reference .waste-art {height:103px}
   html:not(.booth-portrait) .menu-v29.menu-reference .waste-items img {width:34px;height:34px}
-  html:not(.booth-portrait) .menu-v29.menu-reference .menu-mascot-slot {height:160px;width:200px;margin-bottom:-18px}
+  html:not(.booth-portrait) .menu-v29.menu-reference .menu-mascot-slot {height:190px;width:210px;margin-bottom:0}
   html:not(.booth-portrait) .menu-v29.menu-reference .play-panel {padding:24px;border-radius:34px}
   html:not(.booth-portrait) .menu-v29.menu-reference .play-panel h2 {font-size:31px}
   html:not(.booth-portrait) .menu-v29.menu-reference .name-field input {height:55px;font-size:17px}
   html:not(.booth-portrait) .menu-v29.menu-reference .menu-start-btn {height:61px;font-size:26px!important}
-  html:not(.booth-portrait) .menu-v29.menu-reference .play-panel > #open-leaderboard-btn {height:52px;font-size:18px}
 }

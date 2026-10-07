@@ -7,7 +7,7 @@
   <meta name="description" content="Click to Save the Planet เกมคัดแยกขยะภาษาไทยที่เหมาะสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 เล่น 75 วินาที รองรับหน้าจอสัมผัสและเมาส์" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Click to Save the Planet" />
-  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทยสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 พร้อม Leaderboard บนเครื่องที่เล่น" />
+  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทยสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 พร้อมสรุปคะแนนและค่าลดก๊าซเรือนกระจกโดยประมาณหลังจบรอบ" />
   <meta property="og:url" content="https://nanthawatkhom-creator.github.io/trash-sorter-game/" />
   <meta property="og:image" content="https://nanthawatkhom-creator.github.io/trash-sorter-game/media/game-cover.png" />
   <link rel="icon" href="data:," />
@@ -16,9 +16,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=2026-10-07-motion-control" />
-  <link rel="stylesheet" href="css/booth.css?v=2026-10-07-motion-control" />
-  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-07-motion-control" />
+  <link rel="stylesheet" href="css/style.css?v=2026-10-07-round-summary" />
+  <link rel="stylesheet" href="css/booth.css?v=2026-10-07-round-summary" />
+  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-07-round-summary" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js'"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/howler@2.2.4/howler.min.js'"></script>
 </head>
@@ -113,24 +113,13 @@
       </div>
 
       <div class="play-panel-wrap">
-        <div class="menu-mascot-slot"><img class="menu-mascot" src="assets/menu/mascot-wave-v2.png" alt="มาสคอตโลกน้อยโบกมือ" /></div>
+        <div class="menu-mascot-slot"><img class="menu-mascot" src="assets/menu/mascot-fullbody-v3.png" alt="มาสคอตโลกน้อยเต็มตัวยืนโบกมือ" /></div>
         <div class="play-panel">
-          <span class="mascot-accent accent-a" aria-hidden="true"></span>
-          <span class="mascot-accent accent-b" aria-hidden="true"></span>
           <span class="panel-leaf panel-leaf-a" aria-hidden="true"></span>
           <span class="panel-leaf panel-leaf-b" aria-hidden="true"></span>
 
-          <h2>พร้อมเล่นไหม?</h2>
-          <div class="scribble" aria-hidden="true"><i></i><b></b></div>
-
-          <label for="player-name">ชื่อเล่น</label>
-          <div class="name-field">
-            <span class="name-icon" aria-hidden="true">●</span>
-            <input id="player-name" maxlength="12" autocomplete="off" inputmode="text" placeholder="พิมพ์ชื่อเล่น" />
-          </div>
-          <button id="start-btn" class="primary-btn menu-start-btn"><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
-          <button id="open-leaderboard-btn" class="leaderboard-open-btn" type="button"><span aria-hidden="true">🏆</span> ดู Leaderboard</button>
-          <div class="connection-row service-status"><span id="connection-dot"></span><span id="connection-text">กำลังตรวจสอบ Leaderboard</span></div>
+          <button id="start-btn" class="primary-btn menu-start-btn" type="button" disabled><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
+          <p id="start-error" class="start-error hidden" role="alert"></p>
         </div>
       </div>
     </div>
@@ -143,38 +132,34 @@
     <span id="tutorial-progress-text">0 / 4 ชิ้น</span>
   </div>
 
-  <section id="leaderboard-screen" class="screen leaderboard-screen hidden">
+  <section id="result-screen" class="screen result-screen hidden">
     <div class="end-board">
       <div class="end-board-head">
         <div>
-          <span class="result-kicker" id="leaderboard-kicker">ภารกิจสำเร็จ!</span>
-          <h2 id="leaderboard-title">อันดับวันนี้</h2>
-          <p><strong id="end-player-name">ผู้เล่น</strong> ทำได้ <b id="end-player-score">0</b> คะแนน</p>
-        </div>
-        <div class="end-impact-card">
-          <span>ช่วยลดการปล่อยก๊าซเรือนกระจกโดยประมาณ</span>
-          <strong id="end-impact">≈ 0.00 kg CO₂e</strong>
-          <small>CO₂e คือหน่วยรวมผลกระทบของก๊าซเรือนกระจก ตัวเลขนี้ใช้เพื่อการเรียนรู้</small>
+          <span class="result-kicker">จบรอบแล้ว!</span>
+          <h2>สรุปผลการเล่น</h2>
         </div>
       </div>
 
-      <div class="end-stats">
-        <div><span>ความแม่นยำ</span><b id="end-accuracy">0%</b></div>
-        <div><span>คอมโบสูงสุด</span><b id="end-combo">0</b></div>
-        <div><span>คัดแยกสำเร็จ</span><b id="end-items">0 ชิ้น</b></div>
+      <div class="round-score" aria-live="polite">
+        <span>คะแนนรอบนี้</span>
+        <strong id="end-score">0</strong>
+        <span>คะแนน</span>
       </div>
 
-      <div class="leaderboard-table" id="end-leaderboard-list" aria-live="polite">
-        <div class="leaderboard-loading">กำลังโหลดอันดับ...</div>
+      <div class="end-impact-card">
+        <span>ช่วยลดการปล่อยก๊าซเรือนกระจกโดยประมาณ</span>
+        <strong id="end-impact">≈ 0.00 kg CO₂e</strong>
+        <p class="round-items">คัดแยกสำเร็จ <b id="end-items">0 ชิ้น</b></p>
+        <small>CO₂e คือหน่วยรวมผลกระทบของก๊าซเรือนกระจก ตัวเลขนี้เป็นค่าจำลองเพื่อการเรียนรู้</small>
       </div>
-
     </div>
 
     <div class="end-actions single-action result-external-action">
-      <button id="next-player-btn" class="primary-btn">ผู้เล่นคนถัดไป</button>
+      <button id="play-again-btn" class="primary-btn" type="button">เล่นอีกครั้ง</button>
     </div>
   </section>
 </div>
-<script type="module" src="js/game.js?v=2026-10-07-motion-control"></script>
+<script type="module" src="js/game.js?v=2026-10-07-round-summary"></script>
 </body>
 </html>

@@ -1,6 +1,5 @@
 import { WASTE_ITEMS } from '../data/items.js';
-import { getConnectionMode, submitScore, loadTopScores } from './leaderboard-service.js';
-import { setupBoothViewport, portraitMetrics } from './booth-ui.js';
+import { setupBoothViewport, portraitMetrics } from './booth-ui.js?v=2026-10-07-round-summary';
 
 const $ = (id) => document.getElementById(id);
 const hud = $('hud');
@@ -12,17 +11,14 @@ const phaseEl = $('hud-phase');
 const accEl = $('hud-accuracy');
 const impactEl = $('hud-impact');
 const startScreen = $('start-screen');
-const leaderboardScreen = $('leaderboard-screen');
+const resultScreen = $('result-screen');
 const startBtn = $('start-btn');
-const openLeaderboardBtn = $('open-leaderboard-btn');
-const nextPlayerBtn = $('next-player-btn');
-const playerInput = $('player-name');
+const playAgainBtn = $('play-again-btn');
+const startError = $('start-error');
 const toastEl = $('toast');
 const stormBanner = $('storm-banner');
 const waveBanner = $('wave-banner');
 const soundBtn = $('sound-btn');
-const connectionRow = document.querySelector('.connection-row');
-const connectionText = $('connection-text');
 const comboCard = document.querySelector('.hud-card.combo');
 const tutorialHud = $('tutorial-hud');
 const tutorialProgressFill = $('tutorial-progress-fill');
@@ -82,7 +78,7 @@ function stopMusic() {
 soundBtn.addEventListener('click', () => {
   makeSounds();
   muted = !muted;
-  Howler.mute(muted);
+  window.Howler?.mute(muted);
   soundBtn.innerHTML = muted ? '<span>เสียง</span><strong>ปิด</strong>' : '<span>เสียง</span><strong>เปิด</strong>';
   soundBtn.classList.toggle('muted', muted);
   if (!muted && sceneRef?.playing) startMusic();
@@ -179,87 +175,32 @@ function resetVisualFeedback() {
   comboCard?.classList.remove('is-celebrating');
 }
 
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>'"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[ch]));
-}
-
-function leaderboardRowsHtml(rows, current = null) {
-  return rows.map((row, index) => {
-    const isCurrent = current && row.name === current.name && Math.round(Number(row.score || 0)) === Math.round(current.score);
-    return `
-      <div class="leader-row ${isCurrent ? 'current' : ''}">
-        <div class="leader-rank">${index + 1}</div>
-        <div class="leader-name">${escapeHtml(row.name || 'ผู้เล่น')}</div>
-        <div class="leader-score">${Math.round(Number(row.score || 0)).toLocaleString('th-TH')}</div>
-        <div class="leader-impact">${Number(row.co2e || 0).toFixed(2)} kg CO₂e</div>
-      </div>`;
-  }).join('') || '<div class="leaderboard-loading">ยังไม่มีคะแนน</div>';
-}
-
-async function openLeaderboardFromMenu() {
-  stopMusic();
-  startScreen.classList.add('hidden');
-  hud.classList.add('hidden');
-  tutorialHud?.classList.add('hidden');
-  leaderboardScreen.classList.add('browse-only');
-  $('leaderboard-kicker').textContent = 'คะแนนสูงสุด';
-  $('leaderboard-title').textContent = 'Leaderboard';
-  nextPlayerBtn.textContent = 'กลับหน้าเริ่มเกม';
-  const list = $('end-leaderboard-list');
-  list.innerHTML = '<div class="leaderboard-loading">กำลังโหลดอันดับ...</div>';
-  leaderboardScreen.classList.remove('hidden');
-
-  try {
-    list.innerHTML = leaderboardRowsHtml(await loadTopScores(10));
-  } catch (err) {
-    console.warn(err);
-    list.innerHTML = '<div class="leaderboard-loading">โหลดอันดับไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</div>';
-  }
-}
-
-async function showEndLeaderboard(s) {
+function showRoundResult(s) {
   stopMusic();
   playSound('finish');
-  const total = s.correct + s.wrong + s.missed;
-  const accuracy = (s.correct / (total || 1)) * 100;
-
   hud.classList.add('hidden');
-  leaderboardScreen.classList.remove('browse-only');
-  $('leaderboard-kicker').textContent = 'ภารกิจสำเร็จ!';
-  $('leaderboard-title').textContent = 'อันดับวันนี้';
-  nextPlayerBtn.textContent = 'ผู้เล่นคนถัดไป';
-  $('end-player-name').textContent = s.player;
-  $('end-player-score').textContent = Math.round(s.score).toLocaleString('th-TH');
+  tutorialHud?.classList.add('hidden');
+  $('end-score').textContent = Math.round(s.score).toLocaleString('th-TH');
   $('end-impact').textContent = '≈ ' + s.impact.toFixed(2) + ' kg CO₂e';
-  $('end-accuracy').textContent = accuracy.toFixed(0) + '%';
-  $('end-combo').textContent = s.bestCombo.toString();
   $('end-items').textContent = s.correct + ' ชิ้น';
-  const list = $('end-leaderboard-list');
-  list.innerHTML = '<div class="leaderboard-loading">กำลังบันทึกคะแนน...</div>';
-  leaderboardScreen.classList.remove('hidden');
-
-  try {
-    await submitScore({ name: s.player, score: s.score, co2e: s.impact, accuracy, combo: s.bestCombo, items: s.correct });
-  } catch (err) {
-    console.warn(err);
-  }
-
-  try {
-    list.innerHTML = leaderboardRowsHtml(await loadTopScores(10), { name: s.player, score: s.score });
-  } catch (err) {
-    console.warn(err);
-    list.innerHTML = '<div class="leaderboard-loading">โหลดอันดับไม่สำเร็จ แต่คะแนนของคุณถูกบันทึกในเครื่องแล้ว</div>';
-  }
+  playAgainBtn.textContent = 'เล่นอีกครั้ง';
+  resultScreen.classList.remove('hidden');
 }
 
-class GameScene extends Phaser.Scene {
+function showStartFailure(message) {
+  startBtn.disabled = true;
+  startError.textContent = message;
+  startError.classList.remove('hidden');
+}
+
+// Keep the menu error readable when both Phaser CDN requests fail.
+class GameScene extends (window.Phaser?.Scene || class {}) {
   constructor() {
     super('GameScene');
     this.playing = false;
     this.currentHoverBin = null;
     this.tutorialMode = false;
     this.tutorialCorrect = 0;
-    this.tutorialPlayer = 'ผู้เล่น';
   }
 
   preload() {
@@ -321,6 +262,8 @@ class GameScene extends Phaser.Scene {
     this.events.once('shutdown', () => this.hudResizeObserver.disconnect());
     this.layout();
     this.setCleanZoneVisible(false, true);
+    startError.classList.add('hidden');
+    startBtn.disabled = false;
   }
 
   findWasteAt(x, y) {
@@ -652,11 +595,9 @@ class GameScene extends Phaser.Scene {
     if (tutorialProgressText) tutorialProgressText.textContent = `${done} / 4 ชิ้น`;
   }
 
-  startTutorial(player) {
+  startTutorial() {
     resetVisualFeedback();
     this.clearItems();
-    this.player = player || 'ผู้เล่น';
-    this.tutorialPlayer = this.player;
     this.tutorialMode = true;
     this.tutorialCorrect = 0;
     this.playing = true;
@@ -685,7 +626,6 @@ class GameScene extends Phaser.Scene {
     if (tutorialProgressText) tutorialProgressText.textContent = 'พร้อมแล้ว!';
     playSound('combo');
 
-    const player = this.tutorialPlayer || this.player || 'ผู้เล่น';
     const steps = [
       [300, '3'],
       [1200, '2'],
@@ -699,15 +639,14 @@ class GameScene extends Phaser.Scene {
       tutorialHud?.classList.add('hidden');
       tutorialHud?.classList.remove('complete');
       hud.classList.remove('hidden');
-      this.startRound(player);
+      this.startRound();
     });
   }
 
-  startRound(player) {
+  startRound() {
     resetVisualFeedback();
     this.clearItems();
     this.tutorialMode = false;
-    this.player = player || 'ผู้เล่น';
     this.score = 0;
     this.combo = 0;
     this.bestCombo = 0;
@@ -1123,14 +1062,13 @@ class GameScene extends Phaser.Scene {
     updateHud(this);
     this.clearItems();
     resetVisualFeedback();
-    showEndLeaderboard(this);
+    showRoundResult(this);
   }
 }
 
 async function init() {
   if (!window.Phaser) {
-    connectionText.textContent = 'โหลดเกมไม่สำเร็จ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรช';
-    startBtn.disabled = true;
+    showStartFailure('โหลดเกมไม่สำเร็จ กรุณาเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรช');
     return;
   }
   await document.fonts?.ready?.catch?.(() => {});
@@ -1144,49 +1082,33 @@ async function init() {
     render: { antialias: true, pixelArt: false, roundPixels: false, transparent: false },
   });
   makeSounds();
-  try {
-    const mode = await getConnectionMode();
-    connectionRow.classList.add(mode);
-    connectionText.textContent = mode === 'online' ? 'Leaderboard ออนไลน์พร้อมแชร์ทุกเครื่อง' : 'Leaderboard โหมดเครื่องเดียว';
-  } catch {
-    connectionRow.classList.add('local');
-    connectionText.textContent = 'Leaderboard โหมดเครื่องเดียว';
-  }
 }
 
 startBtn.addEventListener('click', () => {
   if (!sceneRef || startBtn.disabled) return;
   makeSounds();
-  const name = (playerInput.value.trim() || 'ผู้เล่น').slice(0, 12);
-  playerInput.blur();
   startBtn.disabled = true;
   startScreen.classList.add('starting');
   setTimeout(() => {
     startScreen.classList.add('hidden');
     startScreen.classList.remove('starting');
-    leaderboardScreen.classList.add('hidden');
-    hud.classList.remove('hidden');
-    sceneRef.startTutorial(name);
+    resultScreen.classList.add('hidden');
+    sceneRef.startTutorial();
     startBtn.disabled = false;
   }, document.documentElement.dataset.menuMotion === 'off' ? 0 : 240);
 });
 
-openLeaderboardBtn.addEventListener('click', openLeaderboardFromMenu);
-
-nextPlayerBtn.addEventListener('click', () => {
+playAgainBtn.addEventListener('click', () => {
   resetVisualFeedback();
-  leaderboardScreen.classList.add('hidden');
-  leaderboardScreen.classList.remove('browse-only');
+  resultScreen.classList.add('hidden');
+  hud.classList.add('hidden');
   tutorialHud?.classList.add('hidden');
-  nextPlayerBtn.textContent = 'ผู้เล่นคนถัดไป';
-  playerInput.value = '';
   startScreen.classList.remove('hidden');
-  setTimeout(() => playerInput.focus(), 80);
-});
-
-playerInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') startBtn.click();
+  startBtn.focus({ preventScroll: true });
 });
 
 document.addEventListener('contextmenu', e => e.preventDefault());
-init();
+init().catch(error => {
+  console.error(error);
+  showStartFailure('เปิดเกมไม่สำเร็จ กรุณารีเฟรชหน้าเว็บแล้วลองอีกครั้ง');
+});
