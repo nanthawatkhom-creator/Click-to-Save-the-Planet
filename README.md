@@ -6,7 +6,7 @@
 
 ## เล่นออนไลน์
 
-- **[เปิดเกม](https://nanthawatkhom-creator.github.io/trash-sorter-game/)**
+- **[เปิดเกม](https://nanthawatkhom-creator.github.io/Click-to-Save-the-Planet/)**
 
 ## วิธีเล่น
 
@@ -49,8 +49,8 @@
 
 ## Repository
 
-- โค้ดเกมและไฟล์ README: [github.com/nanthawatkhom-creator/trash-sorter-game](https://github.com/nanthawatkhom-creator/trash-sorter-game)
-- เว็บไซต์เกม: [nanthawatkhom-creator.github.io/trash-sorter-game](https://nanthawatkhom-creator.github.io/trash-sorter-game/)
+- โค้ดเกมและไฟล์ README: [github.com/nanthawatkhom-creator/Click-to-Save-the-Planet](https://github.com/nanthawatkhom-creator/Click-to-Save-the-Planet)
+- เว็บไซต์เกม: [nanthawatkhom-creator.github.io/Click-to-Save-the-Planet](https://nanthawatkhom-creator.github.io/Click-to-Save-the-Planet/)
 
 ### พรีวิวจอบูทบนคอมพิวเตอร์
 
