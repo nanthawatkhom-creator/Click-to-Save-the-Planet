@@ -299,7 +299,7 @@
   pointer-events:none;
 }
 #toast.toast[data-tone="wrong"]{background:#fff0e9;color:#922d3c;border-color:#fff4ec}
-#toast.toast[data-tone="clean"],#toast.toast[data-tone="city"]{background:#edf9dd;color:#26533b;border-color:#f7ffec}
+#toast.toast[data-tone="city"]{background:#edf9dd;color:#26533b;border-color:#f7ffec}
 #toast.toast.show{animation:planetNotice 2s ease-out both}
 
 @media(prefers-reduced-motion:reduce){

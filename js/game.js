@@ -1,4 +1,4 @@
-import { WASTE_ITEMS } from '../data/items.js';
+import { WASTE_ITEMS } from '../data/items.js?v=2026-10-07-direct-sort';
 import { setupBoothViewport, portraitMetrics } from './booth-ui.js?v=2026-10-07-round-summary';
 
 const $ = (id) => document.getElementById(id);
@@ -37,12 +37,12 @@ setupBoothViewport();
 const BY_ID = Object.fromEntries(WASTE_ITEMS.map(item => [item.id, item]));
 
 const WAVE_PRESETS = [
-  { title: 'เวฟ 1 · เริ่มจริง!', quota: 4, maxActive: 4, spawnDelay: 0.70, speed: [22, 30], pool: ['can', 'apple', 'tissue', 'cable'], allowDirty: false },
-  { title: 'เวฟ 2 · เจอของใหม่', quota: 7, maxActive: 3, spawnDelay: 0.78, speed: [28, 39], pool: ['pet', 'can', 'banana', 'apple', 'wrapper', 'milk-carton', 'eggshell', 'plastic-cup'], allowDirty: false },
-  { title: 'เวฟ 3 · เริ่มเร็วขึ้น', quota: 9, maxActive: 3, spawnDelay: 0.70, speed: [35, 49], pool: ['pet', 'glass', 'cardboard', 'banana', 'food', 'wrapper', 'foam', 'newspaper', 'plastic-bag', 'tea-bag'], allowDirty: false },
-  { title: 'เวฟ 4 · เพิ่มความท้าทาย', quota: 11, maxActive: 4, spawnDelay: 0.62, speed: [43, 59], pool: ['pet', 'can', 'glass', 'cardboard', 'apple', 'food', 'wrapper', 'foam', 'battery', 'plastic-spoon', 'face-mask', 'glass-jar', 'light-bulb'], allowDirty: false },
-  { title: 'เวฟ 5 · ของยากมาแล้ว', quota: 13, maxActive: 4, spawnDelay: 0.54, speed: [51, 70], pool: ['pet', 'can', 'glass', 'cardboard', 'banana', 'apple', 'food', 'wrapper', 'foam', 'battery', 'cable', 'phone', 'spray-can', 'coffee-cup', 'newspaper', 'eggshell'], allowDirty: false },
-  { title: 'เวฟ 6 · ต้องล้างก่อนทิ้ง', quota: 15, maxActive: 5, spawnDelay: 0.46, speed: [58, 80], pool: WASTE_ITEMS.map(x => x.id), allowDirty: true },
+  { title: 'เวฟ 1 · เริ่มจริง!', quota: 4, maxActive: 4, spawnDelay: 0.70, speed: [22, 30], pool: ['can', 'apple', 'tissue', 'cable'] },
+  { title: 'เวฟ 2 · เจอของใหม่', quota: 7, maxActive: 3, spawnDelay: 0.78, speed: [28, 39], pool: ['pet', 'can', 'banana', 'apple', 'wrapper', 'milk-carton', 'eggshell', 'plastic-cup'] },
+  { title: 'เวฟ 3 · เริ่มเร็วขึ้น', quota: 9, maxActive: 3, spawnDelay: 0.70, speed: [35, 49], pool: ['pet', 'glass', 'cardboard', 'banana', 'food', 'wrapper', 'foam', 'newspaper', 'plastic-bag', 'tea-bag'] },
+  { title: 'เวฟ 4 · เพิ่มความท้าทาย', quota: 11, maxActive: 4, spawnDelay: 0.62, speed: [43, 59], pool: ['pet', 'can', 'glass', 'cardboard', 'apple', 'food', 'wrapper', 'foam', 'battery', 'plastic-spoon', 'face-mask', 'glass-jar', 'light-bulb'] },
+  { title: 'เวฟ 5 · ของยากมาแล้ว', quota: 13, maxActive: 4, spawnDelay: 0.54, speed: [51, 70], pool: ['pet', 'can', 'glass', 'cardboard', 'banana', 'apple', 'food', 'wrapper', 'foam', 'battery', 'cable', 'phone', 'spray-can', 'coffee-cup', 'newspaper', 'eggshell'] },
+  { title: 'เวฟ 6 · แยกให้ไว', quota: 15, maxActive: 5, spawnDelay: 0.46, speed: [58, 80], pool: WASTE_ITEMS.map(x => x.id) },
 ];
 
 let sceneRef = null;
@@ -55,7 +55,6 @@ function makeSounds() {
   sounds = {
     correct: new Howl({ src: ['assets/audio/correct.wav'], volume: 0.58 }),
     wrong: new Howl({ src: ['assets/audio/wrong.wav'], volume: 0.52 }),
-    clean: new Howl({ src: ['assets/audio/clean.wav'], volume: 0.55 }),
     combo: new Howl({ src: ['assets/audio/combo.wav'], volume: 0.58 }),
     storm: new Howl({ src: ['assets/audio/storm.wav'], volume: 0.58 }),
     start: new Howl({ src: ['assets/audio/start.wav'], volume: 0.55 }),
@@ -223,16 +222,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     this.bins = {};
     this.makeBins();
 
-    this.cleanG = this.add.graphics().setDepth(4);
-    this.cleanText = this.add.text(0, 0, 'จุดล้าง', {
-      fontFamily: 'Noto Sans Thai, sans-serif', fontSize: '16px', fontStyle: '900', color: '#44515C'
-    }).setOrigin(0.5).setDepth(5);
-    this.cleanSub = this.add.text(0, 0, 'เฉพาะของที่เปื้อน', {
-      fontFamily: 'Noto Sans Thai, sans-serif', fontSize: '10px', color: '#6B7480'
-    }).setOrigin(0.5).setDepth(5);
-    this.cleanPulse = this.add.circle(0, 0, 54, 0xC8F4F0, 0.16).setStrokeStyle(4, 0x78D9D0, 0.70).setDepth(3);
-    this.tweens.add({ targets: this.cleanPulse, scale: 1.12, alpha: 0.06, duration: 850, yoyo: true, repeat: -1, ease: 'Sine.InOut' });
-
     this.activeDrag = null;
     this.activePointerId = null;
 
@@ -261,7 +250,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     this.hudResizeObserver.observe(tutorialHud);
     this.events.once('shutdown', () => this.hudResizeObserver.disconnect());
     this.layout();
-    this.setCleanZoneVisible(false, true);
     startError.classList.add('hidden');
     startBtn.disabled = false;
   }
@@ -388,33 +376,11 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
       b.hit = new Phaser.Geom.Ellipse(x, binY - hitH * .50, hitW, hitH);
     });
 
-    const cleanR = portrait ? Math.max(44, 86 * u) : (w < 760 ? 52 : 62);
-    this.cleanCenter = { x: w - cleanR - Math.max(18, 48 * u), y: Math.max(this.safeTop + cleanR + (portrait ? 24 * u : 12), h * .22), r: cleanR };
-    this.cleanG.clear();
-    this.cleanG.fillStyle(0xFFFFFF, .90);
-    this.cleanG.lineStyle(4, 0x8DE4DB, .92);
-    this.cleanG.fillCircle(this.cleanCenter.x, this.cleanCenter.y, cleanR);
-    this.cleanG.strokeCircle(this.cleanCenter.x, this.cleanCenter.y, cleanR);
-    this.cleanPulse.setPosition(this.cleanCenter.x, this.cleanCenter.y).setRadius(cleanR * .94);
-    this.cleanText.setFontSize(portrait ? Math.max(12, 26 * u) : 16).setPosition(this.cleanCenter.x, this.cleanCenter.y - (portrait ? 12 * u : 8));
-    this.cleanSub.setFontSize(portrait ? Math.max(9, 18 * u) : 10).setPosition(this.cleanCenter.x, this.cleanCenter.y + (portrait ? 25 * u : 18));
     for (const item of this.items) {
       if (Number.isFinite(item.fallSpeed)) item.fallSpeed *= fallFactor / previousFallFactor;
       this.resizeWasteItem(item);
     }
     if (this.tutorialMode && this.items.length) this.positionTutorialItems();
-  }
-
-  setCleanZoneVisible(visible, instant = false) {
-    this.cleanUnlocked = !!visible;
-    for (const obj of [this.cleanG, this.cleanText, this.cleanSub, this.cleanPulse]) obj?.setVisible(!!visible);
-    if (visible && !instant) {
-      for (const obj of [this.cleanText, this.cleanSub, this.cleanPulse]) obj?.setScale(0.72)?.setAlpha?.(0);
-      this.cleanG?.setAlpha(0);
-      this.tweens.add({ targets: this.cleanG, alpha: 1, duration: 260 });
-      this.tweens.add({ targets: [this.cleanText, this.cleanSub, this.cleanPulse], scale: 1, alpha: 1, duration: 360, ease: 'Back.Out' });
-      showWaveBanner('ปลดล็อกจุดล้าง · ล้างของเปื้อนก่อนทิ้ง');
-    }
   }
 
   makeBins() {
@@ -525,7 +491,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     item.innerHalo.setRadius(grabRadius - 8);
     item.wasteShadow.setPosition(0, grabRadius * .52).setDisplaySize(grabRadius * 1.12, grabRadius * .30);
     const badgeSize = portrait ? Math.max(10, 22 * unit) : 10;
-    item.dirtyBadge?.setPosition(grabRadius * .48, -grabRadius * .56).setFontSize(badgeSize);
     item.rareBadge?.setPosition(-grabRadius * .50, -grabRadius * .56).setFontSize(badgeSize);
     if (!item.isDragging && item.tutorialSlot === undefined) {
       item.x = Phaser.Math.Clamp(item.x, grabRadius, this.scale.width - grabRadius);
@@ -564,7 +529,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     const { grabRadius, maxVisual } = this.wasteSizing();
     const c = this.add.container(pos.x, pos.y).setDepth(10);
     c.wasteDef = def;
-    c.cleaned = true;
     c.isDragging = false;
     c.age = 0;
     c.hitRadius = grabRadius;
@@ -604,7 +568,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     this.activeDrag = null;
     this.activePointerId = null;
     this.currentHoverBin = null;
-    this.setCleanZoneVisible(false, true);
     this.setCityStage(0, true);
     hud.classList.add('hidden');
     tutorialHud?.classList.remove('hidden');
@@ -666,7 +629,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     this.activeDrag = null;
     this.activePointerId = null;
     this.playing = true;
-    this.setCleanZoneVisible(false, true);
     this.setCityStage(0, true);
     this.layout();
     this.advanceWave(true);
@@ -698,7 +660,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
       spawnDelay: Math.max(0.38, 0.54 - bonus * 0.04),
       speed: [62 + bonus * 4, 86 + bonus * 6],
       pool: WASTE_ITEMS.map(x => x.id),
-      allowDirty: true,
     };
   }
 
@@ -710,17 +671,11 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     this.waveResolved = false;
     this.spawnClock = initial ? 0.28 : 0.78;
     showWaveBanner(this.currentWave.title);
-    if (this.currentWave.allowDirty && !this.cleanUnlocked) {
-      this.time.delayedCall(520, () => {
-        if (this.playing) this.setCleanZoneVisible(true);
-      });
-    }
     updateHud(this);
   }
 
   randomDef() {
     let ids = [...(this.currentWave.pool || WASTE_ITEMS.map(x => x.id))];
-    if (!this.currentWave.allowDirty) ids = ids.filter(id => !BY_ID[id].dirty);
     if (this.lastSpawnId && ids.length > 1) ids = ids.filter(id => id !== this.lastSpawnId);
     if (this.storm && ids.includes('board') && Math.random() < 0.14) {
       this.lastSpawnId = 'board';
@@ -750,8 +705,7 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
       const candidateX = Phaser.Math.Between(margin, Math.max(margin + 1, w - margin));
       const candidateY = Phaser.Math.Between(startYBase, startYBase + (w < 600 ? 84 : 110));
       const farEnough = this.items.every(it => Phaser.Math.Distance.Between(it.x, it.y, candidateX, candidateY) > minGap);
-      const clearOfWash = !this.portraitLayout || !this.cleanUnlocked || Phaser.Math.Distance.Between(candidateX, candidateY, this.cleanCenter.x, this.cleanCenter.y) > this.cleanCenter.r + grabRadius + 16 * this.layoutUnit;
-      if (farEnough && clearOfWash) {
+      if (farEnough) {
         foundSpace = true;
         startX = candidateX;
         startY = candidateY;
@@ -762,7 +716,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     if (this.portraitLayout && !foundSpace) return;
     const c = this.add.container(startX, startY).setDepth(10);
     c.wasteDef = def;
-    c.cleaned = !def.dirty;
     c.isDragging = false;
     c.age = 0;
     c.hitRadius = grabRadius;
@@ -780,13 +733,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     c.innerHalo = innerHalo;
     c.wasteShadow = shadow;
 
-    if (def.dirty) {
-      const dirty = this.add.text(grabRadius * 0.48, -grabRadius * 0.56, 'ล้างก่อน', {
-        fontFamily: 'Noto Sans Thai, sans-serif', fontSize: w < 600 ? '9px' : '10px', fontStyle: '900', color: '#7B4F60', backgroundColor: '#FFE5EC', padding: { x: 6, y: 4 }
-      }).setOrigin(0.5);
-      c.add(dirty);
-      c.dirtyBadge = dirty;
-    }
     if (def.rare) {
       const rare = this.add.text(-grabRadius * 0.50, -grabRadius * 0.56, 'BONUS', {
         fontFamily: 'Noto Sans Thai, sans-serif', fontSize: w < 600 ? '9px' : '10px', fontStyle: '900', color: '#5F4C80', backgroundColor: '#EFE7FF', padding: { x: 6, y: 4 }
@@ -891,22 +837,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
       return;
     }
 
-    if (this.cleanUnlocked && Phaser.Math.Distance.Between(obj.x, obj.y, this.cleanCenter.x, this.cleanCenter.y) <= this.cleanCenter.r + 40) {
-      if (def.dirty && !obj.cleaned) {
-        obj.cleaned = true;
-        obj.dirtyBadge?.setText('สะอาดแล้ว').setBackgroundColor('#D8F3E3').setColor('#4A7F5E');
-        this.score += 25;
-        playSound('clean');
-        this.dropFeedback(null, '✓ ล้างแล้ว +25', 'good', { x: this.cleanCenter.x, y: this.cleanCenter.y + this.cleanCenter.r + 24 * this.layoutUnit });
-        this.spark(obj.x, obj.y, 0x82D6D2);
-        this.tweens.add({ targets: obj, x: Math.max(110, this.cleanCenter.x - 135), y: this.cleanCenter.y + 105, duration: 260, ease: 'Back.Out' });
-        updateHud(this);
-        return;
-      }
-      this.dropFeedback(null, 'ชิ้นนี้ไม่ต้องล้าง', 'neutral', { x: this.cleanCenter.x, y: this.cleanCenter.y + this.cleanCenter.r + 24 * this.layoutUnit });
-      return;
-    }
-
     let hit = hoveredBin;
     if (!hit) {
       for (const [cat, b] of Object.entries(this.bins)) {
@@ -918,18 +848,6 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     }
 
     if (!hit) return;
-
-    if (def.category === 'recycle' && def.dirty && !obj.cleaned) {
-      this.combo = 0;
-      this.score = Math.max(0, this.score - 15);
-      wrongEdge();
-      this.dropFeedback(hit, '✕ ต้องล้างก่อน −15', 'wrong');
-      playSound('wrong');
-      this.setBinVisual(hit, 'wrong');
-      this.tweens.add({ targets: obj, x: Math.max(110, this.cleanCenter.x - 135), y: this.cleanCenter.y + 105, duration: 260, ease: 'Back.Out' });
-      updateHud(this);
-      return;
-    }
 
     if (hit !== def.category) {
       this.wrong += 1;
