@@ -1,5 +1,6 @@
 import { WASTE_ITEMS } from '../data/items.js?v=2026-10-07-direct-sort';
-import { setupBoothViewport, portraitMetrics } from './booth-ui.js?v=2026-10-07-round-summary';
+import { setupBoothViewport, portraitMetrics } from './booth-ui.js?v=2026-10-09-local-leaderboard';
+import { loadTopScores, submitScore, normalizePlayerName, isLeaderboardTemporary } from './leaderboard-service.js?v=2026-10-09-local-leaderboard';
 
 const $ = (id) => document.getElementById(id);
 const hud = $('hud');
@@ -13,6 +14,13 @@ const impactEl = $('hud-impact');
 const startScreen = $('start-screen');
 const resultScreen = $('result-screen');
 const startBtn = $('start-btn');
+const startForm = $('start-form');
+const playerInput = $('player-name');
+const nameError = $('name-error');
+const leaderboardScreen = $('leaderboard-screen');
+const openLeaderboardBtn = $('open-leaderboard-btn');
+const resultLeaderboardBtn = $('result-leaderboard-btn');
+const leaderboardBackBtn = $('leaderboard-back-btn');
 const playAgainBtn = $('play-again-btn');
 const startError = $('start-error');
 const toastEl = $('toast');
@@ -31,6 +39,8 @@ let edgeTimer;
 let impactTimer;
 let comboTimer;
 let lastEdgeAt = 0;
+let latestScoreId = null;
+let leaderboardSource = 'menu';
 
 setupBoothViewport();
 
@@ -182,8 +192,79 @@ function showRoundResult(s) {
   $('end-score').textContent = Math.round(s.score).toLocaleString('th-TH');
   $('end-impact').textContent = '≈ ' + s.impact.toFixed(2) + ' kg CO₂e';
   $('end-items').textContent = s.correct + ' ชิ้น';
+  $('end-player-name').textContent = s.player;
+  const submission = submitScore({ name: s.player, score: s.score, co2e: s.impact, items: s.correct });
+  latestScoreId = submission.current.id;
+  const status = $('score-save-status');
+  status.dataset.state = submission.saved ? 'saved' : 'temporary';
+  if (!submission.saved) {
+    status.textContent = 'เบราว์เซอร์บล็อก Cookie · เก็บอันดับได้ชั่วคราวจนกว่าจะปิดหน้านี้';
+  } else if (submission.rank) {
+    status.textContent = `บันทึกคะแนนแล้ว · อันดับ ${submission.rank} ของเครื่องนี้`;
+  } else {
+    status.textContent = 'คะแนนรอบนี้ยังไม่ติด 10 อันดับสูงสุด · ลองอีกครั้งได้เลย!';
+  }
   playAgainBtn.textContent = 'เล่นอีกครั้ง';
   resultScreen.classList.remove('hidden');
+}
+
+function openLeaderboard(source) {
+  if (sceneRef?.playing || startScreen.classList.contains('starting')) return;
+  leaderboardSource = source;
+  resetVisualFeedback();
+  stopMusic();
+  startScreen.classList.add('hidden');
+  resultScreen.classList.add('hidden');
+  hud.classList.add('hidden');
+  tutorialHud?.classList.add('hidden');
+  const list = $('leaderboard-list');
+  list.replaceChildren();
+  const rows = loadTopScores();
+  rows.forEach((row, index) => {
+    const item = document.createElement('li');
+    item.className = 'leaderboard-row';
+    if (source === 'result' && row.id === latestScoreId) {
+      item.classList.add('current');
+      item.setAttribute('aria-current', 'true');
+    }
+    const rank = document.createElement('span');
+    rank.className = 'leaderboard-rank';
+    rank.textContent = index + 1;
+    const player = document.createElement('div');
+    player.className = 'leaderboard-player';
+    const name = document.createElement('strong');
+    name.textContent = row.name;
+    const impact = document.createElement('small');
+    impact.textContent = `≈ ${row.co2e.toFixed(2)} kg CO₂e`;
+    player.append(name, impact);
+    const score = document.createElement('div');
+    score.className = 'leaderboard-score';
+    const points = document.createElement('strong');
+    points.textContent = row.score.toLocaleString('th-TH');
+    const unit = document.createElement('small');
+    unit.textContent = 'คะแนน';
+    score.append(points, unit);
+    item.append(rank, player, score);
+    list.append(item);
+  });
+  $('leaderboard-empty').classList.toggle('hidden', rows.length > 0);
+  $('leaderboard-storage-note').textContent = isLeaderboardTemporary()
+    ? 'Cookie ถูกบล็อก · อันดับเก็บชั่วคราวในหน้านี้'
+    : 'บันทึกด้วย Cookie ในเบราว์เซอร์นี้ · คะแนนแต่ละเครื่องแยกกัน';
+  leaderboardBackBtn.textContent = source === 'result' ? 'กลับหน้าสรุปผล' : 'กลับหน้าเริ่มเกม';
+  leaderboardScreen.classList.remove('hidden');
+  $('leaderboard-title').focus({ preventScroll: true });
+}
+
+function closeLeaderboard() {
+  leaderboardScreen.classList.add('hidden');
+  if (leaderboardSource === 'result') {
+    resultScreen.classList.remove('hidden');
+    resultLeaderboardBtn.focus({ preventScroll: true });
+  } else {
+    startScreen.classList.remove('hidden');
+    openLeaderboardBtn.focus({ preventScroll: true });
+  }
 }
 
 function showStartFailure(message) {
@@ -559,7 +640,8 @@ class GameScene extends (window.Phaser?.Scene || class {}) {
     if (tutorialProgressText) tutorialProgressText.textContent = `${done} / 4 ชิ้น`;
   }
 
-  startTutorial() {
+  startTutorial(playerName) {
+    this.player = playerName;
     resetVisualFeedback();
     this.clearItems();
     this.tutorialMode = true;
@@ -1002,8 +1084,21 @@ async function init() {
   makeSounds();
 }
 
-startBtn.addEventListener('click', () => {
+startForm.addEventListener('submit', event => {
+  event.preventDefault();
   if (!sceneRef || startBtn.disabled) return;
+  const name = normalizePlayerName(playerInput.value);
+  if (!name) {
+    nameError.textContent = 'ใส่ชื่อเล่นก่อนเริ่มเกมนะ';
+    nameError.classList.remove('hidden');
+    playerInput.setAttribute('aria-invalid', 'true');
+    playerInput.focus();
+    return;
+  }
+  playerInput.value = name;
+  playerInput.blur();
+  nameError.classList.add('hidden');
+  playerInput.removeAttribute('aria-invalid');
   makeSounds();
   startBtn.disabled = true;
   startScreen.classList.add('starting');
@@ -1011,9 +1106,20 @@ startBtn.addEventListener('click', () => {
     startScreen.classList.add('hidden');
     startScreen.classList.remove('starting');
     resultScreen.classList.add('hidden');
-    sceneRef.startTutorial();
+    sceneRef.startTutorial(name);
     startBtn.disabled = false;
   }, document.documentElement.dataset.menuMotion === 'off' ? 0 : 240);
+});
+
+playerInput.addEventListener('input', () => {
+  nameError.classList.add('hidden');
+  playerInput.removeAttribute('aria-invalid');
+});
+openLeaderboardBtn.addEventListener('click', () => openLeaderboard('menu'));
+resultLeaderboardBtn.addEventListener('click', () => openLeaderboard('result'));
+leaderboardBackBtn.addEventListener('click', closeLeaderboard);
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !leaderboardScreen.classList.contains('hidden')) closeLeaderboard();
 });
 
 playAgainBtn.addEventListener('click', () => {
@@ -1021,6 +1127,10 @@ playAgainBtn.addEventListener('click', () => {
   resultScreen.classList.add('hidden');
   hud.classList.add('hidden');
   tutorialHud?.classList.add('hidden');
+  playerInput.value = '';
+  latestScoreId = null;
+  nameError.classList.add('hidden');
+  playerInput.removeAttribute('aria-invalid');
   startScreen.classList.remove('hidden');
   startBtn.focus({ preventScroll: true });
 });

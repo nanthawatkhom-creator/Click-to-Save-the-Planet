@@ -7,7 +7,7 @@
   <meta name="description" content="Click to Save the Planet เกมคัดแยกขยะภาษาไทยที่เหมาะสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 เล่น 75 วินาที รองรับหน้าจอสัมผัสและเมาส์" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Click to Save the Planet" />
-  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทยสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 พร้อมสรุปคะแนนและค่าลดก๊าซเรือนกระจกโดยประมาณหลังจบรอบ" />
+  <meta property="og:description" content="เกมคัดแยกขยะภาษาไทยสำหรับจอบูทแนวตั้ง 9:16 แนะนำ 1080×1920 พร้อมสรุปผลและ Leaderboard แยกตามเครื่องและเบราว์เซอร์" />
   <meta property="og:url" content="https://nanthawatkhom-creator.github.io/Click-to-Save-the-Planet/" />
   <meta property="og:image" content="https://nanthawatkhom-creator.github.io/Click-to-Save-the-Planet/media/game-cover.png" />
   <link rel="icon" href="data:," />
@@ -18,7 +18,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css?v=2026-10-07-direct-sort" />
   <link rel="stylesheet" href="css/booth.css?v=2026-10-07-direct-sort" />
-  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-07-direct-sort" />
+  <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-09-standee" />
+  <link rel="stylesheet" href="css/leaderboard.css?v=2026-10-09-local-leaderboard" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js'"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/howler@2.2.4/howler.min.js'"></script>
 </head>
@@ -41,6 +42,7 @@
   <div id="wave-banner" class="wave-banner hidden" role="status" aria-live="polite">เวฟ 1</div>
 
   <section id="start-screen" class="screen start-screen menu-v28 menu-v29 menu-reference">
+    <a class="menu-standee-link" href="standee.html" aria-label="เปิดหน้าโชว์แบบสแตนดี้"><span aria-hidden="true">▧</span> หน้าโชว์สแตนดี้</a>
     <button id="menu-motion-btn" class="menu-motion-btn" type="button" aria-label="ลูกเล่นหน้าเมนู" aria-pressed="false"><span aria-hidden="true">✦</span><span class="menu-motion-label">ลูกเล่น:</span><b id="menu-motion-status">ปิด</b></button>
     <div class="menu-backdrop" aria-hidden="true"><img class="menu-bg" src="assets/menu/bg.png" alt="" /></div>
 
@@ -114,13 +116,19 @@
 
       <div class="play-panel-wrap">
         <div class="menu-mascot-slot"><img class="menu-mascot" src="assets/menu/mascot-fullbody-v3.png" alt="มาสคอตโลกน้อยเต็มตัวยืนโบกมือ" /></div>
-        <div class="play-panel">
+        <form id="start-form" class="play-panel" novalidate>
           <span class="panel-leaf panel-leaf-a" aria-hidden="true"></span>
           <span class="panel-leaf panel-leaf-b" aria-hidden="true"></span>
 
-          <button id="start-btn" class="primary-btn menu-start-btn" type="button" disabled><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
+          <div class="name-field">
+            <span class="name-icon" aria-hidden="true"></span>
+            <input id="player-name" name="player-name" type="text" placeholder="พิมพ์ชื่อเล่น" aria-label="ชื่อเล่น" maxlength="20" required autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go" aria-describedby="name-error" />
+          </div>
+          <p id="name-error" class="name-error hidden" role="alert"></p>
+          <button id="start-btn" class="primary-btn menu-start-btn" type="submit" disabled><span>เริ่มเกม</span><i aria-hidden="true"></i></button>
+          <button id="open-leaderboard-btn" class="leaderboard-button menu-leaderboard-btn" type="button"><span aria-hidden="true">🏆</span> ดู Leaderboard</button>
           <p id="start-error" class="start-error hidden" role="alert"></p>
-        </div>
+        </form>
       </div>
     </div>
   </section>
@@ -138,6 +146,7 @@
         <div>
           <span class="result-kicker">จบรอบแล้ว!</span>
           <h2>สรุปผลการเล่น</h2>
+          <p id="end-player-name" class="end-player-name"></p>
         </div>
       </div>
 
@@ -153,13 +162,29 @@
         <p class="round-items">คัดแยกสำเร็จ <b id="end-items">0 ชิ้น</b></p>
         <small>CO₂e คือหน่วยรวมผลกระทบของก๊าซเรือนกระจก ตัวเลขนี้เป็นค่าจำลองเพื่อการเรียนรู้</small>
       </div>
+      <p id="score-save-status" class="score-save-status" role="status"></p>
     </div>
 
-    <div class="end-actions single-action result-external-action">
+    <div class="end-actions result-external-action result-leaderboard-actions">
       <button id="play-again-btn" class="primary-btn" type="button">เล่นอีกครั้ง</button>
+      <button id="result-leaderboard-btn" class="leaderboard-button" type="button"><span aria-hidden="true">🏆</span> ดู Leaderboard</button>
+    </div>
+  </section>
+
+  <section id="leaderboard-screen" class="screen leaderboard-screen hidden" aria-labelledby="leaderboard-title">
+    <div class="leaderboard-board">
+      <span class="leaderboard-kicker">🏆 คะแนนสูงสุดของเครื่องนี้</span>
+      <h2 id="leaderboard-title" tabindex="-1">Leaderboard</h2>
+      <p class="leaderboard-caption">10 อันดับสูงสุด · แยกตามเครื่องและเบราว์เซอร์</p>
+      <div class="leaderboard-list-wrap">
+        <ol id="leaderboard-list" class="leaderboard-list" aria-label="อันดับคะแนน"></ol>
+        <p id="leaderboard-empty" class="leaderboard-empty hidden">ยังไม่มีคะแนน<br />มาเป็นคนแรกที่ช่วยโลกกัน!</p>
+      </div>
+      <p id="leaderboard-storage-note" class="leaderboard-storage-note"></p>
+      <button id="leaderboard-back-btn" class="leaderboard-button" type="button">กลับหน้าเริ่มเกม</button>
     </div>
   </section>
 </div>
-<script type="module" src="js/game.js?v=2026-10-07-direct-sort"></script>
+<script type="module" src="js/game.js?v=2026-10-09-local-leaderboard"></script>
 </body>
 </html>

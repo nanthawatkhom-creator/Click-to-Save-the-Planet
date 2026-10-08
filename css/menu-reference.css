@@ -260,6 +260,15 @@
   0%,100% {transform:scale(1)}
   50% {transform:scale(1.012)}
 }
+.menu-standee-link {
+  position:absolute;z-index:10;top:max(12px,calc(18 * var(--booth-unit)));left:max(12px,calc(18 * var(--booth-unit)));
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:7px 11px;
+  border:2px solid rgba(255,255,255,.95);border-radius:999px;background:rgba(248,255,238,.9);
+  color:#345e49;font:600 clamp(11px,calc(16 * var(--booth-unit)),16px) 'Noto Sans Thai',sans-serif;text-decoration:none;
+  box-shadow:0 4px 12px rgba(37,80,58,.08);
+}
+.menu-standee-link:hover {background:#e5f5cc}
+.menu-standee-link:focus-visible {outline:3px solid #235d45;outline-offset:3px}
 .menu-motion-btn {
   position:absolute;
   z-index:10;
