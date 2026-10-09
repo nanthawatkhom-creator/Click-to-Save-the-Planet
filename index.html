@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/booth.css?v=2026-10-07-direct-sort" />
   <link rel="stylesheet" href="css/menu-reference.css?v=2026-10-09-standee" />
   <link rel="stylesheet" href="css/leaderboard.css?v=2026-10-09-local-leaderboard" />
+  <link rel="stylesheet" href="css/menu-effects.css?v=2026-10-09-garden-effects" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.90.0/phaser.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js'"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/howler@2.2.4/howler.min.js'"></script>
 </head>
@@ -55,12 +56,12 @@
     <div class="menu-shell">
       <div class="menu-info">
         <div class="sdg-logos" aria-label="SDG 12 และ SDG 13">
-          <img src="assets/sdg/sdg12.png" alt="SDG 12 การบริโภคและการผลิตอย่างมีความรับผิดชอบ" />
-          <img src="assets/sdg/sdg13.png" alt="SDG 13 การรับมือการเปลี่ยนแปลงสภาพภูมิอากาศ" />
+          <div class="menu-sdg-effect sdg-twelve"><img src="assets/sdg/sdg12.png" alt="SDG 12 การบริโภคและการผลิตอย่างมีความรับผิดชอบ" /><span class="menu-sdg-sparkles" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
+          <div class="menu-sdg-effect sdg-thirteen"><img src="assets/sdg/sdg13.png" alt="SDG 13 การรับมือการเปลี่ยนแปลงสภาพภูมิอากาศ" /><span class="menu-sdg-sparkles" aria-hidden="true"><i></i><i></i><i></i><i></i></span></div>
         </div>
 
         <div class="menu-title planet-title" aria-label="Click to Save the Planet">
-          <img class="planet-wordmark" src="assets/menu/planet-wordmark-v2.png" alt="" aria-hidden="true" onerror="this.hidden=true" />
+          <div class="menu-logo-art"><img class="planet-wordmark" src="assets/menu/planet-wordmark-v2.png" alt="" aria-hidden="true" onerror="this.hidden=true" /><i class="menu-logo-shine" aria-hidden="true"></i></div>
           <span class="title-dark">Click to Save</span>
           <span class="title-pink">the Planet</span>
           <i class="title-leaf leaf-one"></i>
@@ -115,7 +116,13 @@
       </div>
 
       <div class="play-panel-wrap">
-        <div class="menu-mascot-slot"><img class="menu-mascot" src="assets/menu/mascot-fullbody-v3.png" alt="มาสคอตโลกน้อยเต็มตัวยืนโบกมือ" /></div>
+        <div class="menu-mascot-slot">
+          <div class="menu-mascot-aura" aria-hidden="true">
+            <i class="menu-aura-ring"></i><i class="menu-aura-ring"></i><i class="menu-aura-ring"></i>
+            <div class="menu-eco-particles"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="menu-mascot-actor"><img class="menu-mascot" src="assets/menu/mascot-fullbody-v3.png" alt="มาสคอตโลกน้อยเต็มตัว กระพริบตา โบกมือ และดีใจ" /><span class="menu-mascot-sprite" aria-hidden="true"></span></div>
+        </div>
         <form id="start-form" class="play-panel" novalidate>
           <span class="panel-leaf panel-leaf-a" aria-hidden="true"></span>
           <span class="panel-leaf panel-leaf-b" aria-hidden="true"></span>
@@ -186,5 +193,6 @@
   </section>
 </div>
 <script type="module" src="js/game.js?v=2026-10-09-local-leaderboard"></script>
+<script type="module" src="js/menu-effects.js?v=2026-10-09-garden-effects"></script>
 </body>
 </html>

@@ -13,6 +13,10 @@
 <main><div class="device"><iframe src="./?preview=local-leaderboard" title="Click to Save the Planet - จอบูทแนวตั้ง" allow="autoplay; fullscreen"></iframe></div></main>
 <script>
 const area=document.querySelector('main'),frame=document.querySelector('iframe'),device=document.querySelector('.device');
+const gameUrl=new URL('./',window.location.href);
+gameUrl.searchParams.set('preview',new URL(window.location.href).searchParams.get('preview')||'local-leaderboard');
+frame.src=gameUrl.href;
+document.querySelector('header a').href=gameUrl.href;
 function fit(){const s=Math.min((area.clientWidth-20)/1080,(area.clientHeight-20)/1920);device.style.width=(1080*s)+'px';device.style.height=(1920*s)+'px';frame.style.transform='scale('+s+')';}
 new ResizeObserver(fit).observe(area);fit();
 </script>
